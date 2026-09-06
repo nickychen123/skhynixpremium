@@ -58,6 +58,31 @@ def md(s: str) -> str:
     return s.replace("$", "\\$")
 
 
+TILE_CSS = """<style>
+.tile{padding:2px 0 6px}
+.tile-label{font-size:.82rem;opacity:.75;margin-bottom:2px}
+.tile-value{font-size:1.55rem;font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.tile-sub{font-size:1rem;font-weight:500;line-height:1.3;margin-top:2px}
+.tile-cap{font-size:.78rem;opacity:.6;line-height:1.35;margin-top:4px}
+</style>"""
+
+
+def tile(col, label: str, value: str, sub: str | None = None, caption: str | None = None, help: str | None = None) -> None:
+    """A metric tile that wraps long values instead of truncating them (st.metric cuts them off)."""
+    title = f' title="{help}"' if help else ""
+    parts = [f'<div class="tile"><div class="tile-label"{title}>{label}{" ⓘ" if help else ""}</div>',
+             f'<div class="tile-value">{value}</div>']
+    if sub:
+        parts.append(f'<div class="tile-sub">{sub}</div>')
+    if caption:
+        parts.append(f'<div class="tile-cap">{caption}</div>')
+    parts.append("</div>")
+    col.markdown("".join(parts), unsafe_allow_html=True)   # raw HTML: no markdown/LaTeX processing, so no escaping
+
+
+st.markdown(TILE_CSS, unsafe_allow_html=True)
+
+
 def krw(x) -> str:
     return f"₩{x:,.0f}" if ok(x) else "—"
 
@@ -322,20 +347,22 @@ def live_panel() -> None:
     oa = now - track[hl.SKHX][1] if hl.SKHX in track else None
     ob = now - track[hl.SKHY][1] if hl.SKHY in track else None
     t = st.columns(6)
-    t[0].metric("Oracle premium", pct(d["oracle_prem"]), help="SKHY oracle × 10 / SKHYNIX oracle − 1. Oracles only move while the underlying venue trades.")
-    t[0].caption(md(f"SKHY {usd(d['b_oracle'])} · SKHYNIX {usd(d['a_oracle'], 1)} · oracles last moved {age(oa)} / {age(ob)} ago"))
-    t[1].metric("Executable · sell / buy", f"{pct(d['sell_prem'])} / {pct(d['buy_prem'])}",
-                help="Sell premium: hit the SKHY bid, lift the SKHYNIX ask. Buy premium: the reverse.")
-    t[1].caption(f"SKHYNIX {d['a_bid'] or '—'} / {d['a_ask'] or '—'} · SKHY {d['b_bid'] or '—'} / {d['b_ask'] or '—'}")
-    t[2].metric("Carry · long SKHYNIX / short SKHY", f"{pct(d['carry_apr'], 1)} APR",
-                help="SKHY funding − SKHYNIX funding, hourly, annualised. Positive = the position receives.")
-    t[2].caption(f"net {pct(d['carry_h'], 4)}/h · SKHYNIX {pct(d['a_fund'], 4)}/h ({pct(d['a_apr'], 0)}) · SKHY {pct(d['b_fund'], 4)}/h ({pct(d['b_apr'], 0)})")
-    t[3].metric("Implied KRX price", krw(d["krx_implied"]), help="SKHYNIX oracle × USD/KRW oracle")
-    t[3].caption(f"USD/KRW {d['krw']:,.1f} · ADR-implied {krw(d['adr_implied'])}" if ok(d["krw"]) else "USD/KRW oracle unavailable")
-    t[4].metric("KRX session", ("Open · closes in " if k.is_open else "Closed · opens in ") + k.until_label)
-    t[4].caption(f"{k.local:%H:%M} KST · {mh.KRX.hours_label}")
-    t[5].metric("Nasdaq session", ("Open · closes in " if n.is_open else "Closed · opens in ") + n.until_label)
-    t[5].caption(f"{n.local:%H:%M} ET · {mh.NASDAQ.hours_label}")
+    tile(t[0], "Oracle premium", pct(d["oracle_prem"]),
+         caption=f"SKHY {usd(d['b_oracle'])} · SKHYNIX {usd(d['a_oracle'], 1)} · oracles last moved {age(oa)} / {age(ob)} ago",
+         help="SKHY oracle × 10 / SKHYNIX oracle − 1. Oracles only move while the underlying venue trades.")
+    tile(t[1], "Executable · sell premium", pct(d["sell_prem"]), sub=f"buy {pct(d['buy_prem'])}",
+         caption=f"SKHYNIX {d['a_bid'] or '—'} / {d['a_ask'] or '—'} · SKHY {d['b_bid'] or '—'} / {d['b_ask'] or '—'}",
+         help="Sell premium: hit the SKHY bid, lift the SKHYNIX ask. Buy premium: the reverse.")
+    tile(t[2], "Carry · long SKHYNIX / short SKHY", f"{pct(d['carry_apr'], 1)} APR", sub=f"net {pct(d['carry_h'], 4)}/h",
+         caption=f"SKHYNIX {pct(d['a_fund'], 4)}/h ({pct(d['a_apr'], 0)}) · SKHY {pct(d['b_fund'], 4)}/h ({pct(d['b_apr'], 0)})",
+         help="SKHY funding − SKHYNIX funding, hourly, annualised. Positive = the position receives.")
+    tile(t[3], "Implied KRX price", krw(d["krx_implied"]),
+         caption=(f"USD/KRW {d['krw']:,.1f} · ADR-implied {krw(d['adr_implied'])}" if ok(d["krw"]) else "USD/KRW oracle unavailable"),
+         help="SKHYNIX oracle × USD/KRW oracle")
+    tile(t[4], "KRX session", "Open" if k.is_open else "Closed", sub=("closes in " if k.is_open else "opens in ") + k.until_label,
+         caption=f"{k.local:%H:%M} KST · {mh.KRX.hours_label}")
+    tile(t[5], "Nasdaq session", "Open" if n.is_open else "Closed", sub=("closes in " if n.is_open else "opens in ") + n.until_label,
+         caption=f"{n.local:%H:%M} ET · {mh.NASDAQ.hours_label}")
 
     fetched = st.session_state.get("last_fetch")
     st.caption(f"REST polling every {refresh}s · last update {age(now - fetched) if fetched else '—'} ago · {utc_clock()}")
