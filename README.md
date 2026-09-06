@@ -31,9 +31,12 @@ carry (1h)   = funding(SKHY) − funding(SKHYNIX)          # long SKHYNIX / shor
 ## Quick start
 
 ```bash
-pip install -r requirements.txt          # streamlit, plotly, pandas
-streamlit run app.py                     # opens http://localhost:8501
+python -m pip install -r requirements.txt   # streamlit, plotly, pandas
+python -m streamlit run app.py              # opens http://localhost:8501
 ```
+
+The `python -m` form works even when Python's `Scripts` folder is not on your PATH
+(the plain `streamlit` command needs it).
 
 ```bash
 python -m unittest discover -s tests -v                    # 22 offline tests, no network

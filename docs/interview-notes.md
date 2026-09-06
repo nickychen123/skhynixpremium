@@ -109,7 +109,7 @@ drawdown for zero price P&L."
 
 ## Demo script (if there is a screen)
 
-1. `streamlit run app.py`. Point at the hero, then the three premiums and why they differ right now (which exchange is open; the "oracle last moved" ages).
+1. `python -m streamlit run app.py`. Point at the hero, then the three premiums and why they differ right now (which exchange is open; the "oracle last moved" ages).
 2. Switch the range to 24H, hover the chart, show the stats strip and the z-score. Set an alert in the sidebar.
 3. Show the carry tile, then open the Carry backtest tab and read the drawdown against the "APR" the tile shows. That contrast is the whole point.
 4. Unwind calculator: drag the target premium; note that 36% → 0% is −26.5%.
