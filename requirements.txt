@@ -1,5 +1,6 @@
 # Streamlit dashboard only. analysis/ and tests/ need nothing beyond the standard library.
-streamlit>=1.45
+# Streamlit >= 1.50 for width="stretch" on charts and dataframes and for st.fragment(run_every=...).
+streamlit>=1.50
 plotly>=5.20
 pandas>=2.2
 tzdata

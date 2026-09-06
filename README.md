@@ -49,6 +49,22 @@ python analysis/tsmc.py --csv data/tsmc_premium.csv         # TSMC ADR premium, 
 The analysis scripts and tests need nothing beyond Python 3.10+. The HTML monitor needs
 nothing at all: open [`index.html`](index.html) in a browser.
 
+## Deploy to Streamlit Community Cloud
+
+The app needs no secrets and no database, so it deploys as-is from a GitHub repository.
+
+1. Push this repository to GitHub (private is fine; Community Cloud can deploy private repos you own).
+2. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub and choose **Create app → Deploy a public app from GitHub** (or the private-repo option after granting the Streamlit GitHub app access).
+3. Repository: this repo. Branch: `main`. Main file path: `app.py`. Under **Advanced settings** pick Python 3.12.
+4. Deploy. The first build takes a couple of minutes; the app then lives at `https://<name>.streamlit.app`.
+
+Notes for the hosted version:
+
+- `requirements.txt` and `.streamlit/config.toml` are picked up automatically; the theme and the `python -m` note apply unchanged.
+- Outbound requests to Hyperliquid, Yahoo and the Federal Reserve are allowed. If Yahoo rate-limits the cloud's IP, the TSMC tab falls back to the committed snapshot in `data/tsmc_premium.csv` and says so in its caption.
+- Each open browser tab polls Hyperliquid on its own refresh interval. For a handful of viewers that is fine; for a team, raise the refresh slider or add a shared collector (see Roadmap).
+- Free-tier apps go to sleep after inactivity and wake on the next visit, so the first load after a pause is slow.
+
 ## How it fits together
 
 ```mermaid

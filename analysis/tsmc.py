@@ -50,7 +50,7 @@ EVENTS = [
 ]
 
 
-def _get(url: str, timeout: int = 60) -> bytes:
+def _get(url: str, timeout: int = 25) -> bytes:
     with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=timeout) as r:
         return r.read()
 
