@@ -593,8 +593,16 @@ with tab_trade:
     horizons = [1, 7, 14, 30, 60, 90, 180]
     g = grid(sc, [x / 100 for x in exits], horizons, lev)
     gdf = pd.DataFrame(g, index=[f"{x:+.1f}%" for x in exits], columns=[f"{h}d" for h in horizons])
-    st.dataframe(gdf.style.format("{:+.1%}").background_gradient(cmap="RdYlGn", vmin=-0.5, vmax=0.5, axis=None),
-                 width="stretch")
+
+    def cell_color(v: float, full: float = 0.5) -> str:
+        """Red for losses, green for gains, opacity by size; saturates at ±50% return. No matplotlib needed."""
+        if v != v:
+            return ""
+        x = max(-1.0, min(1.0, v / full))
+        r, g, b = (208, 59, 59) if x < 0 else (12, 163, 12)
+        return f"background-color: rgba({r},{g},{b},{abs(x) * 0.55:.2f})"
+
+    st.dataframe(gdf.style.format("{:+.1%}").map(cell_color), width="stretch")
     st.caption("Rows: exit premium. Columns: days held. Same SKHYNIX price change, funding and fees as above. "
                "Read the first row for what the carry alone does; read down a column for what compression is worth.")
 
