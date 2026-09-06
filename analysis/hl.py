@@ -39,12 +39,49 @@ def candles(coin: str, interval: str, start_ms: int, end_ms: int) -> list[dict[s
                  "req": {"coin": coin, "interval": interval, "startTime": start_ms, "endTime": end_ms}})
 
 
+def paginate(fetch, start_ms: int, end_ms: int | None, key: str = "time", max_pages: int = 200) -> list[dict[str, Any]]:
+    """Walk an endpoint that returns a capped, ascending page from startTime.
+
+    `fetch(start, end)` returns one page. Stops when a page is empty, the cursor no longer
+    advances, or `end_ms` is passed. Duplicates at page boundaries are dropped.
+    """
+    out: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    cursor = start_ms
+    page_size: int | None = None
+    for _ in range(max_pages):
+        page = fetch(cursor, end_ms)
+        if not page:
+            break
+        new = [r for r in page if r[key] not in seen]
+        if not new:
+            break
+        out.extend(new)
+        seen.update(r[key] for r in new)
+        if page_size is None:
+            page_size = len(page)
+        elif len(page) < page_size:      # a short page after a full one is the last page
+            break
+        last = new[-1][key]
+        if last <= cursor - 1 or (end_ms is not None and last >= end_ms):
+            break
+        cursor = last + 1
+    return out
+
+
 def funding_history(coin: str, start_ms: int, end_ms: int | None = None) -> list[dict[str, Any]]:
-    """Hourly funding prints: time (ms), fundingRate (per hour, as a fraction), premium."""
-    body: dict[str, Any] = {"type": "fundingHistory", "coin": coin, "startTime": start_ms}
-    if end_ms is not None:
-        body["endTime"] = end_ms
-    return info(body)
+    """Hourly funding prints: time (ms), fundingRate (per hour, as a fraction), premium.
+
+    The endpoint returns at most a few hundred prints per call, oldest first, so long
+    windows are paginated.
+    """
+    def fetch(start: int, end: int | None) -> list[dict[str, Any]]:
+        body: dict[str, Any] = {"type": "fundingHistory", "coin": coin, "startTime": start}
+        if end is not None:
+            body["endTime"] = end
+        return info(body)
+
+    return paginate(fetch, start_ms, end_ms)
 
 
 def l2_book(coin: str) -> dict[str, Any]:

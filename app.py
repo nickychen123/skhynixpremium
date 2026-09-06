@@ -134,6 +134,8 @@ def load_history(range_key: str):
         fdf = fdf.rename(columns={"apr_a": "skhx_apr", "apr_b": "skhy_apr"})
         fdf["time"] = pd.to_datetime(fdf["hour"], unit="ms", utc=True)
         fdf["carry_apr"] = fdf["skhy_apr"] - fdf["skhx_apr"]
+        for c in ("skhx_apr", "skhy_apr"):   # hourly prints are noisy; a 24-print rolling mean is what the eye wants
+            fdf[c + "_24h"] = fdf[c].rolling(24, min_periods=6).mean()
     return df, fdf, interval
 
 
@@ -438,12 +440,18 @@ def history_panel() -> None:
         st.plotly_chart(two_line_chart(df, ("share", "adr10"), ("SKHYNIX", "SKHY ×10"), (C_KR, C_ADR), yprefix="$"),
                         width="stretch", key="px_chart")
     with g2:
-        st.markdown("**Funding rate, annualised %**")
+        st.markdown("**Funding rate, annualised %** · 24-hour average, hourly prints faint")
         if fdf.empty:
             st.info("No funding prints in range.")
         else:
-            st.plotly_chart(two_line_chart(fdf, ("skhx_apr", "skhy_apr"), ("SKHYNIX", "SKHY"), (C_KR, C_ADR), ysuffix="%", hover="%{y:+,.0f}"),
-                            width="stretch", key="fund_chart")
+            ff = go.Figure()
+            for raw, avg, name, col in (("skhx_apr", "skhx_apr_24h", "SKHYNIX", C_KR), ("skhy_apr", "skhy_apr_24h", "SKHY", C_ADR)):
+                ff.add_trace(go.Scatter(x=fdf["time"], y=fdf[raw], mode="lines", name=name + " hourly", line=dict(color=col, width=1),
+                                        opacity=0.25, hovertemplate="%{y:+,.0f}%<extra>" + name + " hourly</extra>", showlegend=False))
+                ff.add_trace(go.Scatter(x=fdf["time"], y=fdf[avg], mode="lines", name=name, line=dict(color=col, width=2),
+                                        hovertemplate="%{y:+,.0f}%<extra>" + name + " 24h avg</extra>"))
+            base_layout(ff, 280, ysuffix="%")
+            st.plotly_chart(ff, width="stretch", key="fund_chart")
     out = df[["time", "share", "adr10", "premium_pct"]].rename(columns={"time": "time_utc", "share": "skhx_usd", "adr10": "skhy_x10_usd"})
     st.download_button("Download CSV", out.to_csv(index=False).encode(), file_name=f"skhy_premium_{range_key}_{interval}.csv",
                        mime="text/csv", key="dl_hist")
