@@ -7,8 +7,8 @@ Four parts, one tested data layer:
 
 | Part | What it is | Where |
 |---|---|---|
-| Streamlit app | Live monitor with mark, oracle and executable premiums, funding carry, session clocks, history charts with range statistics, alerts, an interactive carry backtest and an unwind calculator. | [`app.py`](app.py) |
-| Analysis layer | Standard-library Python: API client, derived metrics, premium series and statistics, venue sessions, carry backtest. 22 unit tests. | [`analysis/`](analysis), [`tests/`](tests) |
+| Streamlit app | Live monitor with mark, oracle and executable premiums, funding carry, session clocks, history charts with range statistics, alerts; a carry backtest; a scenario calculator (entry and exit premium, holding period, funding averaged over any window, fees, leverage, sensitivity grid); an unwind calculator; and TSMC's ADR premium since 2000 for comparison. | [`app.py`](app.py) |
+| Analysis layer | Standard-library Python: API client, derived metrics, premium series and statistics, venue sessions, carry backtest, scenario calculator, TSMC premium pipeline. 40 unit tests. | [`analysis/`](analysis), [`tests/`](tests) |
 | Research note | Why restricted-conversion depositary receipts carry premiums, what ended TSMC's and Infosys's, and what would end this one. Sources graded by quality. | [`research/skhy-adr-premium.html`](research/skhy-adr-premium.html) |
 | Zero-install monitor | The original single HTML file: WebSocket feed, same tiles and charts, no Python needed. For a machine where nothing can be installed. | [`index.html`](index.html) |
 
@@ -39,10 +39,11 @@ The `python -m` form works even when Python's `Scripts` folder is not on your PA
 (the plain `streamlit` command needs it).
 
 ```bash
-python -m unittest discover -s tests -v                    # 22 offline tests, no network
+python -m unittest discover -s tests -v                    # 40 offline tests, no network
 HL_LIVE=1 python -m unittest tests.test_premium.LiveSmoke   # checks both markets exist and the ratio is sane
 python analysis/premium.py --interval 1d --csv data/premium_daily.csv
 python analysis/carry_backtest.py --start 2026-07-15 --csv data/carry_backtest.csv
+python analysis/tsmc.py --csv data/tsmc_premium.csv         # TSMC ADR premium, daily since 2000
 ```
 
 The analysis scripts and tests need nothing beyond Python 3.10+. The HTML monitor needs
@@ -72,7 +73,9 @@ test. `app.py` only fetches, formats and lays out.
 - **Monitor**: hero premium with change vs 24h and vs the 30-day mean, unwind-to-parity move, 24h sparkline; tiles for oracle premium (with "oracle last moved" ages, since a stale leg is the norm outside KRX or Nasdaq hours), executable premium from the top of both books, funding carry in %/h and APR, implied Seoul price in won, KRX and Nasdaq countdowns; market details table; alert log.
 - **History** (24H / 7D / 30D / All): premium with min, max, mean, standard deviation, percentile and z-score; both legs on one axis; annualised funding for both; CSV download and a data table.
 - **Carry backtest**: long 1 SKHYNIX / short 10 SKHY from any date since listing, hourly, with the exchange's actual funding prints. Price, funding and total P&L, drawdown, CSV download.
+- **Trade calculator**: expected P&L for a scenario: entry and exit premium, Seoul price change, holding period, hourly funding on each leg (one click fills in the average over the last 24h, 7d, 30d, since listing or a custom window), fees, leverage. Returns price, funding and fee P&L, return on margin, annualised return, breakeven exit premium, and a sensitivity grid of exit premium against holding period.
 - **Unwind calculator**: how far the ADR falls for any target premium, and how far Seoul would have to rise instead.
+- **TSMC since 2000**: the same premium for TSM against 2330.TW, daily since January 2000, with event markers, reported 1999–2000 figures shown as labelled markers, a by-year regime chart and table, and SKHY's live premium drawn across it for scale.
 - **Alerts**: upper/lower thresholds and a |z| ≥ 2 regime alert, edge-triggered with hysteresis, shown as toasts and kept in a log.
 
 Live data is polled over REST inside auto-refreshing Streamlit fragments (2 to 15 s); history is cached for a minute, baselines and backtests for five.
@@ -88,7 +91,12 @@ Live data is polled over REST inside auto-refreshing Streamlit fragments (2 to 1
 | ADS float | 177.9M ADSs = 2.44% of the company; conversion quota exhausted at listing |
 | Compression trade, 15 Jul → 6 Sep (long 1 SKHYNIX / short 10 SKHY) | price P&L ≈ 0, funding −6% APR, max drawdown 22% of notional |
 
-The last row is the reason the tool exists. On any given day the carry tile can show a
+TSMC's ADR premium, computed the same way from 2000 (yearly means): 2000 +50%, 2001 +45%,
+2002 +25%, 2003 +17%, 2004 +17%, 2005 +8%, then low single digits through the 2010s, +8% in
+2020, +11% in 2021, +16% in 2024, +23% in 2025, +16% so far in 2026, +13% on the last close.
+Twenty-six years on it has never settled at zero.
+
+The row on the compression trade is the reason the tool exists. On any given day the carry tile can show a
 three-digit APR for the compression trade; over seven weeks the funding netted out
 negative and the position spent most of its life under water. The premium is a
 scarce-security price, not a mispricing with a timer on it. The research note works
@@ -107,6 +115,8 @@ Short version; the reasoning and the rejected alternatives are in [`docs/decisio
 
 - Session indicators ignore exchange holidays.
 - History comes from perp candle closes, which track the oracles within roughly 0.5% but are not exchange prints.
+- TSMC: no free daily source for 2330.TW before 2000, so the computed series starts 27 months after the ADR listed; 1999–2000 figures from the press are shown as markers, not data. Closes are split-adjusted on both sides by the same stock-dividend events; FX is the Fed's noon rate, forward-filled; two bad vendor FX ticks are dropped and counted.
+- The scenario calculator assumes constant funding and a linear price path, and ignores liquidation and mark-versus-oracle basis.
 - The Streamlit app polls REST every few seconds per open session; a shared collector would be needed for many users.
 - No persistence: the alert log lives in the session. Export CSV or run the scripts for durable data.
 - Borrow fees and depositary-level ADS counts are not available from public APIs and are tracked by hand in the research note.

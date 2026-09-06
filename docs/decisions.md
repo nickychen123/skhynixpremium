@@ -114,3 +114,34 @@ API client. **Reversal cost.** None; the HTML edition still works and is kept in
 The lesson worth stating in an interview: the first version was right for the first
 question (does this premium exist and what is it now) and wrong for the second (what does
 holding the trade actually cost), and the rewrite followed the question, not the fashion.
+
+## 14. Scenario calculator as a pure function with a closed-form breakeven
+
+**Context.** "What do I earn if the premium goes from here to there over N days at this
+funding rate?" is the question every user of the backtest asked next. **Decision.** A
+`Scenario` dataclass and `evaluate()` in `analysis/calc.py`, with price P&L written as the
+change in the dollar premium (S₀·p₀ − S₁·p₁), funding on each leg's average notional, fees on
+open and close, and a closed-form breakeven exit premium (total P&L is linear in p₁). The app
+adds a window selector that fills the funding inputs with the mean hourly rate over 24h, 7d,
+30d, since listing or a custom range. **Why.** The math is testable in isolation; the
+breakeven is exact rather than searched; and averaging funding over a chosen window is
+labelled in the UI as an assumption, not a forecast, because the backtest already showed how
+far a snapshot can be from the realised path. **Cost.** Constant funding and a linear price
+path; no liquidation or basis modelling.
+
+## 15. TSMC history from free sources, with the gaps shown rather than filled
+
+**Context.** The research note leans on TSMC 1999–2005 as the closest analogue, and the
+user wanted it on the dashboard from the 1997 listing. **Sources tried.** Yahoo has TSM from
+1997 and 2330.TW from 2000 but USD/TWD only from 2004; Stooq sits behind a bot challenge;
+FRED timed out from this network; the Taiwan exchange's own endpoint starts in 2010; the
+BIS API rejected the dataflow. The Federal Reserve's H.10 historical pages carry daily
+USD/TWD from 1990 and parse cleanly. **Decision.** Yahoo split-adjusted closes on both sides
+(both carry the same stock-dividend events, so the 5:1 ratio holds), Fed FX as the
+authoritative rate with Yahoo used only after the last weekly H.10 print, a snapshot CSV
+committed as a fallback, and the pre-2000 period represented by labelled press figures
+rather than interpolation. **Why.** Yahoo's FX history had two impossible ticks (1.80 and
+3.67 to the dollar) that produced −90% premiums; preferring the Fed series removed them at
+the source, and a range check drops anything similar with a visible count. This is
+different from decision 6: those were vendor errors, not market prints. **Cost.** The
+computed series starts 27 months after the listing; same-date closes are 15 hours apart.

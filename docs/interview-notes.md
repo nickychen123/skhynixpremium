@@ -78,6 +78,16 @@ drawdown for zero price P&L."
 - **A**: Rebuilt the dashboard in Streamlit on top of the existing `analysis/` layer, so the app imports the same functions the tests cover. Kept the HTML file as the zero-install option rather than deleting it.
 - **R**: A backtest tab and a calculator in an afternoon, every number on screen with a unit test behind it, and a decision log entry that says why the first choice was right for its question and wrong for the next one.
 
+### 9. Getting data nobody hands you (resourcefulness and data QA)
+- **S**: Wanted TSMC's premium on the dashboard back to its 1997 listing. Free sources each covered part of it: Yahoo had the ADR from 1997 and Taiwan shares from 2000 but exchange rates only from 2004; Stooq was behind a bot wall; FRED timed out; the Taiwan exchange's endpoint starts in 2010.
+- **A**: Found the Federal Reserve's H.10 historical pages with daily USD/TWD back to 1990 and wrote a parser with a unit test on the page format. Made the Fed series authoritative and used Yahoo only for the days after the last weekly print, after Yahoo's FX history produced two impossible premiums near −90%. Added a range check that drops vendor errors and shows the count. Represented the 1997–1999 gap with labelled press figures rather than filling it.
+- **R**: A daily series from 2000 whose yearly means match the literature (about +50% in 2000, low single digits in the 2010s, +16% in 2024). The distinction between a vendor error (drop, count) and a market anomaly (keep, annotate) is a rule I can state.
+
+### 10. Building the calculator people ask for after the backtest
+- **S**: The backtest answered "what happened"; the next question was "what if the premium goes from here to there over N days at this funding rate".
+- **A**: Wrote the scenario math as a pure function with a closed-form breakeven and tests, then a Streamlit form with a one-click fill of average funding over any window, fees, leverage and a sensitivity grid.
+- **R**: The grid's first row shows what carry alone does; each column shows what compression is worth. Labelled the window average as an assumption, because the backtest already proved how far a snapshot can drift from the realised path.
+
 ## Likely behavioural questions and which story to use
 
 | Question | Story |
@@ -90,6 +100,8 @@ drawdown for zero price P&L."
 | How do you decide what to build first | 2 (three premiums; the question a trader asks next) |
 | Describe a technical trade-off | 7 |
 | A time you changed your approach mid-project | 8 |
+| A time you had to find data or work around a blocker | 9 |
+| How do you turn a user question into a feature | 10 |
 | What would you do differently | Roadmap: persist ticks, shared collector, driver model, holiday calendar |
 
 ## Domain points worth having ready
@@ -97,7 +109,7 @@ drawdown for zero price P&L."
 - Premium = ADS × 10 / share − 1; unwind = 1/(1+p) − 1.
 - Why it persists: one-way fungibility, quota exhausted at listing, headroom only from cancellations, raising the cap needs board + FSC + SEC (an offering in all but name), 90-day lockup to ~7 Oct.
 - Why arbitrage does not close it: no convergence date, both legs ~120% annualised vol, borrow, FX, and demand still arriving (Nasdaq-100 window in December, ETFs, retail on both sides).
-- History: TSMC 30–115% in 1999–2000, compressed via conversion sales and the 2000 bust, now ~10%; Infosys 36–61% for six years, compressed after $2.7bn of sponsored ADS supply in 2005–06; Samsung's fungible GDR sat at parity; SK hynix's own Frankfurt GDR is at parity today.
+- History: TSMC 30–115% in 1999–2000, compressed via conversion sales and the 2000 bust (own series, yearly means: 2000 +50%, 2001 +45%, 2002 +25%, 2003 +17%, 2005 +8%, 2010s low single digits, 2024 +16%, 2025 +23%, now ~13%); Infosys 36–61% for six years, compressed after $2.7bn of sponsored ADS supply in 2005–06; Samsung's fungible GDR sat at parity; SK hynix's own Frankfurt GDR is at parity today.
 - Hyperliquid specifics: HIP-3 dexes, deployer oracles, hourly funding, mark vs oracle basis, why the Seoul-leg perp trades under its oracle when KRX is closed.
 
 ## Questions to ask them
@@ -112,6 +124,8 @@ drawdown for zero price P&L."
 1. `python -m streamlit run app.py`. Point at the hero, then the three premiums and why they differ right now (which exchange is open; the "oracle last moved" ages).
 2. Switch the range to 24H, hover the chart, show the stats strip and the z-score. Set an alert in the sidebar.
 3. Show the carry tile, then open the Carry backtest tab and read the drawdown against the "APR" the tile shows. That contrast is the whole point.
-4. Unwind calculator: drag the target premium; note that 36% → 0% is −26.5%.
-5. Open the research note, scroll to the case table and the fourteen questions with their status labels.
-6. `python -m unittest discover -s tests -v`. Twenty-two tests, offline, under a second.
+4. Trade calculator: pick "Last 7d", click "Use these averages", set the exit premium, read the breakeven and the sensitivity grid.
+5. TSMC tab: point at 2000, then the 2010s, then 2024; the dashed line is SKHY today. Twenty-six years and it never settled at zero.
+6. Unwind calculator: drag the target premium; note that 36% → 0% is −26.5%.
+7. Open the research note, scroll to the case table and the fourteen questions with their status labels.
+8. `python -m unittest discover -s tests -v`. Forty tests, offline, under a second.
