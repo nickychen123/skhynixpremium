@@ -1,0 +1,336 @@
+<title>How long can the SKHY premium last?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --page:#f5f4f9;--surface:#fdfdfe;--ink:#17141f;--ink2:#4f4a5e;--muted:#8a8598;--rule:#e1deea;--rule2:#cfcbdc;
+  --accent:#4a3aa7;--accent-soft:rgba(74,58,167,.10);--kr:#2a78d6;--adr:#eb6834;--flag:#b45309;--flag-soft:rgba(180,83,9,.10);
+  --mono:"IBM Plex Mono",Consolas,"Courier New",monospace;--serif:"Newsreader",Georgia,"Times New Roman",serif;--sans:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){color-scheme:dark;--page:#121017;--surface:#1a1722;--ink:#f3f1f8;--ink2:#b7b2c5;--muted:#8a8598;--rule:#2b2736;--rule2:#3a3548;--accent:#9d93ea;--accent-soft:rgba(157,147,234,.14);--kr:#3987e5;--adr:#d95926;--flag:#e0a35a;--flag-soft:rgba(224,163,90,.14)}
+}
+:root[data-theme="dark"]{color-scheme:dark;--page:#121017;--surface:#1a1722;--ink:#f3f1f8;--ink2:#b7b2c5;--muted:#8a8598;--rule:#2b2736;--rule2:#3a3548;--accent:#9d93ea;--accent-soft:rgba(157,147,234,.14);--kr:#3987e5;--adr:#d95926;--flag:#e0a35a;--flag-soft:rgba(224,163,90,.14)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55}
+.doc{max-width:1040px;margin:0 auto;padding:40px 28px 80px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(34px,4.6vw,52px);line-height:1.08;letter-spacing:-.01em;margin:10px 0 14px;max-width:22ch;text-wrap:balance}
+.dek{font-size:20px;line-height:1.45;color:var(--ink2);max-width:62ch;margin:0 0 26px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--mono);font-size:12.5px;color:var(--muted);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:10px 0;margin-bottom:34px}
+.meta b{color:var(--ink2);font-weight:500}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin:0 0 40px}
+.strip>div{background:var(--surface);padding:14px 16px}
+.strip .l{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.strip .v{font-family:var(--serif);font-size:30px;font-weight:500;line-height:1.1;margin:6px 0 4px}
+.strip .s{font-size:13.5px;color:var(--ink2);line-height:1.35}
+@media(max-width:760px){.strip{grid-template-columns:repeat(2,1fr)}}
+section{margin:0 0 44px}
+h2{font-family:var(--serif);font-weight:500;font-size:28px;line-height:1.2;margin:0 0 14px;letter-spacing:-.005em;text-wrap:balance}
+h3{font-family:var(--sans);font-weight:600;font-size:17px;margin:22px 0 6px}
+.prose{max-width:70ch}
+.prose p{margin:0 0 14px}
+.prose ul,.prose ol{margin:0 0 14px;padding-left:22px}
+.prose li{margin:0 0 7px}
+.prose li::marker{color:var(--muted)}
+.lead{font-size:18.5px}
+strong{font-weight:600}
+em{font-style:italic}
+.formula{font-family:var(--mono);font-size:14.5px;background:var(--surface);border:1px solid var(--rule);padding:12px 16px;margin:8px 0 16px;overflow-x:auto;white-space:nowrap}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 18px;margin:16px 0 20px;max-width:70ch}
+.callout p{margin:0 0 8px}.callout p:last-child{margin:0}
+.flag{border-left:3px solid var(--flag);background:var(--flag-soft);padding:12px 18px;margin:16px 0 20px;max-width:70ch}
+.flag p{margin:0}
+.tablewrap{overflow-x:auto;margin:10px 0 18px;border:1px solid var(--rule);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.4}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--rule)}
+th{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--surface);position:sticky;top:0}
+tbody tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.k{font-weight:600;white-space:nowrap}
+.src{color:var(--muted);font-size:12.5px}
+.status{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--rule2);white-space:nowrap}
+.status.ok{color:var(--accent);border-color:var(--accent)}
+.status.part{color:var(--flag);border-color:var(--flag)}
+.status.no{color:var(--muted)}
+figure{margin:18px 0 22px;background:var(--surface);border:1px solid var(--rule);padding:16px 18px 12px}
+figure .fh{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px;margin-bottom:8px}
+figure .ft{font-weight:600;font-size:15.5px}
+figure .fl{display:flex;gap:16px;font-size:13px;color:var(--ink2)}
+.key{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:6px;border-radius:1px}
+figure svg{display:block;width:100%;height:auto;overflow:visible}
+figcaption{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.45}
+details{margin:6px 0 0}
+summary{cursor:pointer;font-family:var(--mono);font-size:12.5px;color:var(--ink2)}
+.tbl{max-height:280px;overflow:auto;margin-top:8px;border:1px solid var(--rule)}
+.tbl table{font-size:13px}
+.sources ol{padding-left:22px;font-size:14.5px;line-height:1.5}
+.sources li{margin:0 0 6px}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--rule2)}
+a:hover{border-bottom-color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:none}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+.ledger{font-family:var(--mono);font-size:13.5px;line-height:1.6;background:var(--surface);border:1px solid var(--rule);padding:12px 16px;margin:8px 0 16px;white-space:pre;overflow-x:auto}
+.foot{border-top:1px solid var(--rule);margin-top:40px;padding-top:14px;font-size:13px;color:var(--muted);max-width:70ch}
+@media(prefers-reduced-motion:no-preference){a{transition:border-color .15s}}
+</style>
+
+<div class="doc">
+  <div class="eyebrow">Research note · Depositary-receipt premiums · SK hynix</div>
+  <h1>How long can the SKHY premium last?</h1>
+  <p class="dek">SK hynix's Nasdaq ADSs trade roughly a third above the same shares in Seoul. The gap is not a pricing error waiting on arbitrage. It is the price of a wrapper that cannot be manufactured, and history says such premiums end when the issuer adds supply, not when traders notice them.</p>
+  <div class="meta"><span>Prepared <b>4 September 2026</b></span><span>Premium basis <b>SKHY × 10 vs KRX 000660, USD</b></span><span>Live data <b>Hyperliquid xyz:SKHY / xyz:SKHX perps (oracle-tracking)</b></span><span>Status <b>working draft, figures flagged by source quality</b></span></div>
+
+  <div class="strip" aria-label="Key figures">
+    <div><div class="l">Premium now</div><div class="v">+36%</div><div class="s">4 Sep close. Since 15 Jul: mean 34%, range 24% to 42%.</div></div>
+    <div><div class="l">ADS float</div><div class="v">2.4%</div><div class="s">177.9M ADSs = 17.79M of 728.9M shares. Quota exhausted at listing.</div></div>
+    <div><div class="l">Lockup ends</div><div class="v">~7 Oct</div><div class="s">90 days from the 9 Jul prospectus. No follow-on supply before then.</div></div>
+    <div><div class="l">Nasdaq-100</div><div class="v">Dec 2026</div><div class="s">First eligible reconstitution. A demand event, on the other side of the ledger.</div></div>
+  </div>
+
+  <section>
+    <h2>The answer in five points</h2>
+    <div class="prose">
+      <ol>
+        <li><strong>A 30–40% premium is stable for as long as the conversion constraint is left in place.</strong> Restricted depositary receipts have held 30–60% premiums for one and a half years (TSMC, late 1998 to 2000) and for six and a half years (Infosys, March 1999 to autumn 2005). Nothing in the arbitrage mechanism forces convergence on a timetable.</li>
+        <li><strong>Premiums of this kind end through supply, not through arbitrage.</strong> In both large historical compressions the decisive events were issuer-driven: TSMC's conversion-sale programmes and its June 2000 ADS offering, and Infosys's three sponsored secondary ADS offerings in 2003, 2005 and 2006. Demand busts (2000–01) and market liberalisation (Korea 1998, India 2002, Taiwan 2003) shrank the steady-state premium, but they finished the job only in combination with more DRs.</li>
+        <li><strong>For SKHY the constraint is corporate and regulatory, not procedural.</strong> The DR quota is 2.5% of shares and was fully used at listing. New ADSs can only be created against ADSs that have been cancelled, and nobody cancels a security trading at a 36% premium. Raising the quota requires a board resolution, a Korean FSC registration and an SEC registration: a follow-on offering in all but name. The 90-day lockup rules that out before early October.</li>
+        <li><strong>The premium's half-life is therefore a decision by SK hynix and the FSC, not a market process.</strong> Issuing more ADSs at a premium is the value-maximising move for the company and its Korean shareholders (TSMC did exactly this in June 2000 at about a 43% premium). Until that decision is taken, the demand calendar (Nasdaq-100 eligibility in December, ETF wrappers, retail on both sides of the Pacific) points the other way.</li>
+        <li><strong>Size the risk with the right arithmetic.</strong> If the premium goes to zero with Seoul unchanged, SKHY falls 26.5%, not 36%. A compression to 10% is a 19% fall. Each 2.5% tranche of new ADSs would double the float; the first such tranche is the event that would move the premium into the 10–20% band TSMC has lived in for most of the last twenty years.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>Definition and arithmetic</h2>
+    <div class="prose">
+      <div class="formula">premium = (SKHY price × 10) / (KRX 000660 price ÷ USD/KRW) − 1</div>
+      <p>Ten ADSs represent one common share. The Seoul leg is converted at the prevailing won rate, so the premium is a dollar comparison and the ADR holder implicitly carries won exposure. The Hyperliquid perps used for the live series track these two prices through deployer oracles: <code>xyz:SKHX</code> is the dollar value of one Seoul share, <code>xyz:SKHY</code> is the ADS.</p>
+      <p>The unwind is asymmetric. A premium of P on the ADR means the ADR must fall by P/(1+P) to reach parity, not by P.</p>
+    </div>
+    <div class="tablewrap" style="max-width:520px"><table>
+      <thead><tr><th>Premium moves from 36% to</th><th class="num">ADR move, Seoul flat</th></tr></thead>
+      <tbody>
+        <tr><td>30%</td><td class="num">−4.4%</td></tr>
+        <tr><td>25%</td><td class="num">−8.1%</td></tr>
+        <tr><td>20%</td><td class="num">−11.8%</td></tr>
+        <tr><td>15%</td><td class="num">−15.4%</td></tr>
+        <tr><td>10% (TSMC's recent range)</td><td class="num">−19.1%</td></tr>
+        <tr><td>5%</td><td class="num">−22.8%</td></tr>
+        <tr><td>0% (parity)</td><td class="num">−26.5%</td></tr>
+      </tbody></table></div>
+    <div class="prose"><p>The same table read from the other side: a Seoul shareholder who could convert would capture 36% by doing so, which is why the question of who is allowed to convert dominates everything else in this note.</p></div>
+  </section>
+
+  <section>
+    <h2>SKHY: what has been verified</h2>
+    <div class="prose"><p>Primary source is the amended F-1; the deposit mechanics come from the Korea Securities Depository (KSD) and Citibank via press reports, marked accordingly.</p></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Item</th><th>Finding</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Offering</td><td>177,900,000 ADSs representing 17,790,000 <em>newly issued</em> common shares, priced 9 Jul 2026 at $149.00, $26.5bn, the largest ADS offering on record. Shares outstanding after the deal: 728,865,500. New shares are 2.50% of pre-deal issued shares and 2.44% of the post-deal total.</td><td class="src">F-1/A; IPOScoop; Investing.com</td></tr>
+        <tr><td class="k">Pricing vs Seoul</td><td>On 3 Jul the Seoul close was ₩2,425,000, equal to $158.14 per ADS at ₩1,533.44. The deal priced 5.8% <em>below</em> Seoul. The premium is a post-listing phenomenon.</td><td class="src">F-1/A</td></tr>
+        <tr><td class="k">Why 2.5%</td><td>The board capped new shares on 24 Jun 2026 "taking into account the requirement under the Monopoly Regulation and Fair Trade Act that SK square maintain ownership of at least 20%". Any further <em>new-share</em> ADS issuance runs into the same holding-company constraint.</td><td class="src">F-1/A</td></tr>
+        <tr><td class="k">Quota</td><td>KSD confirmed the convertible amount is 2.5% of shares and that the quota was exhausted on 10 Jul. Seoul shares can be converted into ADSs only to the extent existing ADSs are first cancelled.</td><td class="src">Bloomberg via KuCoin; Seoul Economic Daily</td></tr>
+        <tr><td class="k">Headroom mechanism</td><td>The 25% registered with the SEC is a reserve for re-issuing ADSs that have been cancelled and revived, not a conversion allowance. Raising the real limit "requires procedures equivalent to an additional public offering": board approval, FSC registration, SEC registration.</td><td class="src">Seoul Economic Daily, 19 Jul</td></tr>
+        <tr><td class="k">Conversion window</td><td>Citibank's conversion book was closed until 29 Jul; two-way conversion has been possible since, into headroom only. KSD reported no conversions as of late August.</td><td class="src">TradingKey; Korea JoongAng Daily</td></tr>
+        <tr><td class="k">Re-deposit</td><td>Risk factor: "If you surrender your ADSs in order to withdraw the underlying common shares, you may not be allowed to deposit the common shares again to obtain ADSs."</td><td class="src">F-1/A</td></tr>
+        <tr><td class="k">Lockup</td><td>Company and certain affiliates: 90 days from the prospectus date, so roughly 7 Oct 2026. Depositary: Citibank, N.A.</td><td class="src">F-1/A</td></tr>
+        <tr><td class="k">Premium prints</td><td>About 14% at the debut close (10 Jul); 49–51% intraday on 14 Jul; 24.6% on 19 Jul; about 30% in late August; 36% on 4 Sep.</td><td class="src">Lamont; Bloomberg; SED; JoongAng; own series</td></tr>
+        <tr><td class="k">Who is buying</td><td>US retail; US institutions restricted from holding Korean lines; index and ETF demand; and Korean retail, which net-bought $877m of SKHY through 24 Aug, the second most-bought foreign stock in Korea over the period.</td><td class="src">Lamont (Acadian); Korea JoongAng Daily</td></tr>
+        <tr><td class="k">Short side</td><td>Short interest about 27.2M ADSs (≈15% of ADSs outstanding), days to cover ≈0.8. Borrow fee not found. A 1x short ETF (SKHZ) and a 2x long ETF (ticker SKHX, not to be confused with the Hyperliquid perp) launched 14 Jul.</td><td class="src">Finviz (unverified); ETF.com</td></tr>
+        <tr><td class="k">Control group</td><td>SK hynix's Frankfurt GDR trades near parity. KB Financial and Shinhan ADRs trade near zero premium. Same country, same rules, no scarcity, no premium.</td><td class="src">Lamont (Acadian)</td></tr>
+      </tbody></table></div>
+
+    <figure>
+      <div class="fh"><div class="ft">ADR premium since listing, daily closes</div><div class="fl"><span><i class="key" style="background:var(--accent)"></i>SKHY × 10 vs SKHYNIX, %</span></div></div>
+      <svg id="c1" viewBox="0 0 980 340" role="img" aria-label="Daily ADR premium from 9 July to 4 September 2026"></svg>
+      <figcaption>Daily closes of the Hyperliquid <code>xyz:SKHY</code> and <code>xyz:SKHX</code> perps, which track the ADS and the dollar value of a Seoul share through deployer oracles. The 13 Jul reading reflects an oracle anomaly on the Seoul leg (a bad pre-market print) rather than a market-wide premium change. Intraday extremes (51% on 14 Jul) are not visible in closes.</figcaption>
+      <details><summary>Data table</summary><div class="tbl" id="t1"></div></details>
+    </figure>
+
+    <figure>
+      <div class="fh"><div class="ft">The two legs, rebased to 100 on 9 July</div><div class="fl"><span><i class="key" style="background:var(--kr)"></i>SKHYNIX (Seoul share, USD)</span><span><i class="key" style="background:var(--adr)"></i>SKHY × 10</span></div></div>
+      <svg id="c2" viewBox="0 0 980 300" role="img" aria-label="Seoul share in dollars and ADS times ten, both rebased to 100"></svg>
+      <figcaption>Since listing the Seoul leg is down about 19% in dollars while the ADS is up about 3%. Daily premium changes are essentially uncorrelated with Seoul moves (ρ = −0.10) and mildly positive with ADR moves (ρ = +0.28): the premium is set on the US side. Both legs ran near 120% annualised volatility over the period.</figcaption>
+      <details><summary>Data table</summary><div class="tbl" id="t2"></div></details>
+    </figure>
+
+    <div class="prose">
+      <h3>What the series says</h3>
+      <p>The premium did not decay after 29 July when two-way conversion opened; it rose to its 42% high two weeks later. That is the expected result of a headroom rule with no headroom: the conversion right is real but nobody will exercise it at a premium, so supply stays at 177.9M ADSs. The premium behaves like a scarce security's own price, moving with US flow and sentiment rather than with the Korean share.</p>
+      <p>Volatility is the second barrier. With both legs near 120% annualised and the premium itself swinging 3 percentage points a day, a short-ADR long-Seoul position that entered at 30% in late July was 12 points under water by mid-August. Lamont's July note put Seoul above 100% and the ADS above 200% realised volatility. Arbitrage capital with a convergence date it cannot name and path risk of that size stays small, which is why 15% short interest has not closed the gap.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Why arbitrage cannot close it</h2>
+    <div class="prose">
+      <p>The textbook trade is buy Seoul, deposit, sell ADSs. Every step after "buy Seoul" is blocked or expensive:</p>
+      <ul>
+        <li><strong>Deposit is one-way.</strong> ADSs convert into Seoul shares freely; Seoul shares convert into ADSs only against cancelled ADSs. Korean deposit agreements have long required issuer consent for deposits (subject to government authorisation), with re-deposits of withdrawn shares the standing exception; LG Display's 20-F states the pattern explicitly. SKHY's F-1 goes further and warns that even re-deposit may be refused.</li>
+        <li><strong>The cap is a legal artefact, not a queue.</strong> 2.5% was set by the board to keep SK square at or above 20% under the Fair Trade Act. More <em>new</em> shares in ADS form dilute SK square unless it buys Seoul shares alongside. Converting <em>existing</em> shares (the TSMC and Infosys route) avoids dilution but still needs a board resolution, an FSC registration statement and an SEC registration.</li>
+        <li><strong>Timing.</strong> The company and affiliates are locked up for 90 days. Even a willing board cannot add supply before roughly 7 October.</li>
+        <li><strong>The synthetic version is costly.</strong> Short SKHY (borrow, roughly 15% of ADSs already lent), long 000660 through a Korean custody line (open to institutions; foreign-investor registration IDs were abolished in December 2023 and omnibus accounts and 24-hour won trading arrived in 2024), hedge the won, and wait for a convergence event that no one can date. Lamont's arithmetic for TSMC applies: a 1% annual carry against a 20% premium that takes two decades to close is a losing trade.</li>
+        <li><strong>Demand keeps arriving.</strong> Nasdaq-100 eligibility from the December 2026 reconstitution (if SKHY ranks by ADS market value after the seasoning period), ETF wrappers, and retail in two countries. TSMC's premium widened, not narrowed, into the 2024 AI rally for the same reason.</li>
+      </ul>
+    </div>
+    <div class="callout"><p><strong>The Frankfurt test.</strong> SK hynix has a GDR in Frankfurt that trades at parity. Same company, same Korean regulator, same fundamentals. The 36% is not about SK hynix or about Korea; it is about a specific US-listed security whose supply is fixed by decree while its demand is not.</p></div>
+  </section>
+
+  <section>
+    <h2>What history says about duration</h2>
+    <div class="prose"><p>Two regimes. Where the home share and the receipt are fungible in both directions, premiums live inside transaction costs (most European and Japanese cross-listings, Samsung's London GDR after Korea removed ownership limits in May 1998, SK hynix's own GDR). Where creation is restricted, the receipt is a separate security and its premium is set by demand against a fixed float.</p></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Case</th><th>Constraint</th><th>Premium regime</th><th>Time above 30%</th><th>What ended it</th><th>Quality</th></tr></thead>
+      <tbody>
+        <tr><td class="k">TSMC<br><span class="src">NYSE ADR, Oct 1997</span></td><td>Taiwan shares could not be deposited by holders; supply came only through company-run conversion sales (board policy May 1999; e.g. a 0.5%-of-shares tranche in Jan 2001). ADR share of company 2.9% at listing.</td><td>Roughly 30–70% through 1999; 65–70% late Jan 2000; about 115% intraday on 26 Jan 2000; 12-month average near 51%. June 2000 ADS offering priced about 43% above Taiwan.</td><td class="num">≈1.5–2 yrs<br>(late 1998 → 2000)</td><td>Tech bust plus repeated ADS supply: ADR share rose to 20.5% by 2007. QFII regime abolished 2003. Steady state since: 3% (2010–20), 7% (2020–23), 15–25% (2024), about 10% now.</td><td><span class="status part">mixed</span></td></tr>
+        <tr><td class="k">Infosys<br><span class="src">Nasdaq ADR, Mar 1999</span></td><td>Indian shares could not be deposited until Feb 2002; thereafter only into headroom from cancellations. Sponsored ADS issues against existing shares allowed from Nov 2002.</td><td>Annual averages 57%, 61%, 46%, 49%, 36% for 2001–05 (five-year mean 50%). 39% on 5 Jul 2005. Lamont cites 136% in March 2000.</td><td class="num">≈6.5 yrs<br>(Mar 1999 → Aug 2005)</td><td>Sponsored secondary ADS offerings: $294m Jul 2003, $1.1bn Jun 2005, $1.6bn Nov 2006 (ADS share 14% → 19%). Premium about 14% by Mar 2006, 8–19% in 2006–07.</td><td><span class="status ok">primary</span></td></tr>
+        <tr><td class="k">Wipro, Satyam<br><span class="src">Indian IT ADRs</span></td><td>Same Indian rules as Infosys.</td><td>Wipro 2%, 3%, 12%, 37%, 27% (2001–05); Satyam 15%, 10%, 24%, 45%, 21%. Wipro started at a 13–14% discount in 2000.</td><td class="num">≈1 yr each<br>(2004)</td><td>Same 2005 decline as the sector. Shows the rule sets the ceiling, company-specific demand and float set the level.</td><td><span class="status ok">primary</span></td></tr>
+        <tr><td class="k">Samsung Electronics<br><span class="src">London GDR</span></td><td>Korea's foreign ownership limits (10% in 1992, 50–55% Dec 1997) abolished May 1998; GDR effectively fungible.</td><td>About −5% (Dec 1998), +4% (Dec 1999), possibly +18% (Dec 2000). A case study describes a −4% to +4% year around parity.</td><td class="num">none</td><td>Never needed ending: open access plus fungibility kept it at parity. The end state for SKHY if both conditions are met.</td><td><span class="status no">working est.</span></td></tr>
+        <tr><td class="k">UMC<br><span class="src">NYSE ADS, Sep 2000</span></td><td>Same Taiwan rules as TSMC.</td><td>ADS offering priced about 15% above Taiwan shares.</td><td class="num">n/a</td><td>Control: same rules as TSMC, far smaller premium.</td><td><span class="status no">working est.</span></td></tr>
+        <tr><td class="k">SK hynix GDR; KB, Shinhan ADRs<br><span class="src">2026</span></td><td>Korean consent-based deposits, but no scarcity.</td><td>Near parity.</td><td class="num">none</td><td>Control: Korean wrappers without a fixed, exhausted float do not carry premiums.</td><td><span class="status part">press</span></td></tr>
+      </tbody></table></div>
+    <div class="prose">
+      <h3>Three channels, in order of importance</h3>
+      <p><strong>Supply.</strong> Every compression from above 30% coincides with the issuer letting more DRs exist. TSMC's board adopted its conversion-sale policy in May 1999 and sold ADSs into the premium in June 2000; the premium never regained its 2000 levels even in 2021 or 2024, when demand was again extreme. Infosys's premium stayed above 30% for six years <em>because</em> India's headroom rule locked supply; it came down within eighteen months of two sponsored offerings totalling $2.7bn. Note the level at which supply mattered: Infosys still carried a 36–50% premium with ADSs at 14% of shares. Float share alone does not end a premium; the change in supply relative to demand does.</p>
+      <p><strong>Demand.</strong> The 2000–01 bust cut TSMC's premium from over 100% to the 40s within months, but with the float still small the premium stayed positive for years. A demand shock is fast but partial.</p>
+      <p><strong>Access.</strong> Removing ownership limits (Korea 1998), abolishing QFII (Taiwan 2003) and two-way fungibility (India 2002) each lowered the steady-state premium by widening who can hold the home share. They act slowly and on the institutional part of demand only. Retail and index demand are not touched by them.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Scenarios for SKHY</h2>
+    <div class="prose">
+      <h3>A. Constraint holds, demand holds (the Infosys path)</h3>
+      <p>No board action; index inclusion in December adds forced buyers. Premium oscillates in a 20–50% band with a 30–40% centre for as long as the memory cycle and US retail enthusiasm last. This is the base case until a supply event is announced. Its risk is not a slow bleed but a step change on the day one is announced.</p>
+      <h3>B. Managed supply (the TSMC path)</h3>
+      <p>After the lockup, SK hynix or its large holders arrange sponsored conversions or a follow-on ADS offering at a premium. Each 2.5% tranche doubles the float. Expect a step down toward 10–20% on announcement (an 12–19% ADR move against Seoul), then a TSMC-style residual premium set by the one-way rule and index demand. Signals: a board resolution, a Korean securities registration statement, an SEC F-3 or F-1, a depositary notice, or SK square buying Seoul shares to preserve its 20%.</p>
+      <h3>C. Demand bust (the 2000 path)</h3>
+      <p>A memory-cycle or AI-sentiment reversal removes the marginal US buyer. Premium compresses quickly toward 10–20% but, with float unchanged, is unlikely to reach parity. Note that in this scenario both legs fall and the ADR falls more.</p>
+      <h3>D. Access liberalisation (the Samsung path)</h3>
+      <p>Korea's push for MSCI developed-market status keeps making Seoul easier for institutions. This trims the "restricted institution" bid over years, not months, and does nothing to retail or index demand. Relevant to the terminal level, not to timing.</p>
+    </div>
+    <div class="flag"><p><strong>Calendar.</strong> ~7 Oct 2026: lockup expiry, the first date on which supply can legally be added. Late Nov 2026: Nasdaq-100 reference date; announcement early Dec, effective third Friday of December. Bi-monthly: Nasdaq short-interest reports. Continuous: KSD conversion data (any cancellation creates headroom; any headroom used is a signal that the premium is being arbitraged).</p></div>
+  </section>
+
+  <section>
+    <h2>What to monitor</h2>
+    <div class="two">
+      <div class="prose">
+        <h3>On the dashboard</h3>
+        <ul>
+          <li><strong>Mark vs oracle premium.</strong> The oracle premium is the real-world gap; the mark premium is what Hyperliquid's 24-hour books expect it to be. A mark premium persistently below the oracle premium means the synthetic market is pricing compression.</li>
+          <li><strong>Funding differential.</strong> The <code>xyz:SKHX</code> perp has been trading 0.3–1% under its oracle with strongly negative funding, so the synthetic market leans short the Seoul leg. The dashboard's carry tile shows what a long-Seoul, short-ADS perp position earns or pays per hour.</li>
+          <li><strong>Range statistics.</strong> A move outside the 24–42% band since 15 July is the first thing worth explaining.</li>
+        </ul>
+      </div>
+      <div class="prose">
+        <h3>Off the dashboard</h3>
+        <ul>
+          <li>KSD DR conversion statistics and Citibank programme data (ADSs outstanding, cancellations).</li>
+          <li>SK hynix 6-K filings and board resolutions; any Korean securities registration statement for DRs; SEC F-3/F-1 filings.</li>
+          <li>Nasdaq short-interest reports and borrow fees for SKHY; SKHZ (short ETF) assets.</li>
+          <li>Korean retail net purchases (KSD SEIBro overseas-stock data); ETF launches; index committee announcements.</li>
+          <li>SK square's stake relative to the 20% floor; National Pension Service and foreign-institution holdings that could be offered in a sponsored conversion.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The brief's fourteen questions</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>#</th><th>Question</th><th>Answer</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td>ADSs outstanding now</td><td>177.9M issued; no conversions recorded by KSD as of late August, so about 177.9M. Current depositary count not obtained.</td><td><span class="status part">partial</span></td></tr>
+        <tr><td class="num">2</td><td>Share of company</td><td>2.44% of 728.9M post-deal shares (2.50% of pre-deal shares).</td><td><span class="status ok">verified</span></td></tr>
+        <tr><td class="num">3</td><td>Can Seoul holders create ADSs now?</td><td>No. Quota exhausted; only into headroom from cancellations.</td><td><span class="status ok">verified (press)</span></td></tr>
+        <tr><td class="num">4</td><td>Company approval per deposit?</td><td>Korean facilities require issuer consent subject to government authorisation, except re-deposits of withdrawn shares; SKHY's F-1 warns re-deposit may be refused. Deposit agreement exhibit not read.</td><td><span class="status part">partial</span></td></tr>
+        <tr><td class="num">5</td><td>Hard ceiling or friction?</td><td>Hard ceiling. Raising it is an offering-equivalent process (board, FSC, SEC).</td><td><span class="status ok">verified (press)</span></td></tr>
+        <tr><td class="num">6</td><td>Can cancelled ADSs be recreated?</td><td>Yes; the 25% SEC registration is a reserve for exactly that. Two-way conversion open since 29 Jul.</td><td><span class="status ok">verified (press)</span></td></tr>
+        <tr><td class="num">7</td><td>Headroom mechanism like India's?</td><td>Functionally identical: re-conversion up to prior cancellations.</td><td><span class="status ok">verified</span></td></tr>
+        <tr><td class="num">8</td><td>Borrow cost</td><td>Not found. Short interest about 27M ADSs (Finviz), days to cover under one.</td><td><span class="status no">unknown</span></td></tr>
+        <tr><td class="num">9</td><td>Can an arb short SKHY and buy 000660?</td><td>Legally yes for institutions with Korean custody; economically it is a carry-negative trade with no convergence date and 120% volatility legs.</td><td><span class="status part">partial</span></td></tr>
+        <tr><td class="num">10</td><td>Korean frictions</td><td>Foreign registration IDs abolished Dec 2023; omnibus accounts and extended won trading from 2024; dividend withholding 15–22%; no general foreign ownership limit since 1998. Retail access from the US remains impractical.</td><td><span class="status part">general knowledge</span></td></tr>
+        <tr><td class="num">11</td><td>Additional issuance likely?</td><td>Not before the lockup ends. New-share issuance is constrained by SK square's 20% floor; sponsored conversion of existing shares is the realistic route. Company intent unknown.</td><td><span class="status part">partial</span></td></tr>
+        <tr><td class="num">12</td><td>Lockups and conversion events</td><td>90-day lockup to about 7 Oct 2026; Nasdaq-100 reconstitution Dec 2026.</td><td><span class="status ok">verified</span></td></tr>
+        <tr><td class="num">13</td><td>Could SK hynix monetise the premium?</td><td>Yes: an ADS follow-on at a 36% premium raises equity about 26% cheaper than in Seoul; TSMC did this in June 2000. Constraint: SK square's 20% floor unless treasury shares or a sponsored conversion are used.</td><td><span class="status part">partial</span></td></tr>
+        <tr><td class="num">14</td><td>Float share at which premiums compressed</td><td>TSMC: from 2.9% at listing; compression accompanied growth toward 20% by 2007 (confounded by the 2000 bust). Infosys: still 36–50% at a 14% ADS share; compressed as supply grew to 19%. The change in supply, not the level, did the work.</td><td><span class="status part">partial</span></td></tr>
+      </tbody></table></div>
+  </section>
+
+  <section>
+    <h2>Data quality</h2>
+    <div class="prose">
+      <ul>
+        <li><strong>Primary-verified:</strong> offering size, share counts, pricing reference, 2.5% rationale, lockup, re-deposit risk factor (F-1/A); Indian ADR annual premiums 2001–05 and the 5 Jul 2005 Bloomberg table (Saxena, NYU Stern, 2006); Infosys offering sizes and the 14% → 19% ADS share (FinanceAsia, Infosys filings); TSMC conversion-sale mechanics (TSMC press release, Jan 2001).</li>
+        <li><strong>Press-verified:</strong> KSD quota and exhaustion, the 25% reserve, conversion-book dates, premium prints, Korean retail flows, short interest.</li>
+        <li><strong>Own series:</strong> Hyperliquid perp closes, which track exchange prices through oracles within about 0.5% but are not the exchange prints; the 13 Jul point is an oracle anomaly.</li>
+        <li><strong>Working estimates from the brief, not re-verified here:</strong> TSMC's 1999–2000 daily premiums and the 31.75% / 51% / 115% figures, Samsung GDR levels, UMC's 15%, Infosys 1999–2000 and monthly 2005 figures. They are directionally consistent with the verified sources (The Economist's "70% more" in January 2000; Lamont's "nearly 90%" for 2000 and 136% for Infosys in March 2000).</li>
+      </ul>
+      <p>Before any of this enters a model: rebuild TSMC 1998–2002 and Infosys 1999–2007 from daily exchange prices with contemporaneous ADR ratios (TSMC's ratio and Taiwan's stock dividends complicate it), and obtain SKHY's deposit agreement (an exhibit to the F-1) for the exact consent language.</p>
+    </div>
+  </section>
+
+  <section class="sources">
+    <h2>Sources</h2>
+    <ol>
+      <li>SK hynix, Form F-1/A (Amendment No. 2), SEC, July 2026: <a href="https://www.sec.gov/Archives/edgar/data/2120882/000119312526295501/d32785df1a.htm">sec.gov</a></li>
+      <li>Owen Lamont, "Hynix Hijinks", Acadian Owenomics, July 2026: <a href="https://www.acadian-asset.com/investment-insights/owenomics/hynix-hijinks">acadian-asset.com</a>; and "TSMC: Totally Stupid Market Chaos", Oct 2024: <a href="https://www.acadian-asset.com/investment-insights/owenomics/tsmc-totally-stupid-market-chaos">acadian-asset.com</a></li>
+      <li>Seoul Economic Daily, "SK hynix '25% ADR Conversion' talk debunked; 2.5% is the limit without new offering", 19 Jul 2026: <a href="https://en.sedaily.com/news/2026/07/19/sk-hynix-25-percent-adr-conversion-talk-debunked-25-percent">sedaily.com</a></li>
+      <li>Korea JoongAng Daily, "Korean investors can buy SK hynix at home. Why are they paying 30% more in New York?", Aug 2026: <a href="https://www.koreajoongangdaily.com/business/korean-investors-can-buy-sk-hynix-at-home-why-are-they-paying-30-more-in-new-york/12839361">koreajoongangdaily.com</a></li>
+      <li>Bloomberg (via KuCoin), "SK Hynix restricts ADR conversion to 2.5% of shares", Jul 2026: <a href="https://www.kucoin.com/news/flash/sk-hynix-limits-adr-conversion-to-2-5-of-shares-blocking-51-arbitrage">kucoin.com</a>; Yahoo Finance, "SK Hynix's 51% arbitrage trade stymied by strict conversion cap": <a href="https://finance.yahoo.com/markets/stocks/articles/sk-hynix-51-arbitrage-trade-073703063.html">finance.yahoo.com</a></li>
+      <li>TradingKey, "SK Hynix ADR premium narrows sharply, two-way conversion imminent", Jul 2026: <a href="https://www.tradingkey.com/analysis/stocks/us-stocks/262034590-nvda-samsung-skhynix-dram-mu-spcx-sndk-tradingkey">tradingkey.com</a></li>
+      <li>IPOScoop, "SK Hynix prices historic Nasdaq ADS deal at $149": <a href="https://www.iposcoop.com/the-ipo-buzz-sk-hynix-of-south-korea-prices-deal-at-149-biggest-ads-deal-in-history/">iposcoop.com</a>; Investing.com, "SK hynix files for 177.9M ADS Nasdaq IPO": <a href="https://www.investing.com/news/stock-market-news/sk-hynix-files-for-1779m-ads-nasdaq-ipo-432SI-4775980">investing.com</a>; CNBC, 10 Jul 2026: <a href="https://www.cnbc.com/2026/07/10/sk-hynix-skhy-stock-nasdaq.html">cnbc.com</a></li>
+      <li>Shivanker Saxena, "Premia in the Indian ADR Market: An Analysis of Trends and Causes", NYU Stern Glucksman Institute, Apr 2006: <a href="https://www.stern.nyu.edu/sites/default/files/assets/documents/uat_024323.pdf">stern.nyu.edu</a></li>
+      <li>FinanceAsia, "Infosys prices $1.6 billion sponsored ADR at 3.2% discount", Nov 2006: <a href="https://www.financeasia.com/article/infosys-prices-1-6-billion-sponsored-adr-at-3-2-discount/68862">financeasia.com</a>; Infosys 6-K filings 2003–2006: <a href="https://www.sec.gov/Archives/edgar/data/0001067491/000106749107000004/exv99w02.htm">sec.gov</a></li>
+      <li>Business Standard, "Two-way fungibility for ADRs/GDRs operational", Feb 2002: <a href="https://www.business-standard.com/article/economy-policy/two-way-fungibility-for-adrs-gdrs-operational-102021401060_1.html">business-standard.com</a></li>
+      <li>TSMC, "TSMC to launch ADR conversion sale #3", Jan 2001: <a href="https://pr.tsmc.com/english/news/2294">pr.tsmc.com</a>; chungderson, TSMC ADR premium dataset 2004–present: <a href="https://github.com/chungderson/tsmc-adr-premium">github.com</a>; Goldman Sachs on the TSM premium (Jun 2024): <a href="https://finance.yahoo.com/news/trading-tsmc-adr-premium-goldman-011005457.html">finance.yahoo.com</a></li>
+      <li>LG Display Form 20-F (deposit consent language): <a href="https://www.sec.gov/Archives/edgar/data/1290109/000119312519127046/d675595d20f.htm">sec.gov</a>; SK Telecom Form 20-F (49% telecom ownership limit): <a href="https://www.sec.gov/Archives/edgar/data/1015650/000114554906000940/h00576e20vf.htm">sec.gov</a></li>
+      <li>ETF.com, "SK Hynix ETFs: 2x long (SKHX) and 1x short (SKHZ)", Jul 2026: <a href="https://www.etf.com/sections/news/sk-hynix-etfs-2x-long-skhx-1x-short-skhz-leverage-shares-themes-arrive-adrs-begin">etf.com</a>; moomoo, "SK hynix is on Nasdaq. Which index buys it next?": <a href="https://www.moomoo.com/community/feed/sk-hynix-is-on-nasdaq-which-index-buys-it-next-116910274117638">moomoo.com</a>; Finviz SKHY statistics: <a href="https://finviz.com/stock?t=SKHY">finviz.com</a></li>
+      <li>Korea foreign-ownership history: Xu, "Globalization Process in Emerging Capital Markets", arXiv 1611.00156: <a href="https://arxiv.org/pdf/1611.00156">arxiv.org</a></li>
+    </ol>
+  </section>
+
+  <div class="foot">Nothing here is investment advice. Premium series computed from Hyperliquid candle closes; see the companion dashboard for the live figure.</div>
+</div>
+
+<script>
+(function(){
+const D=[["2026-07-09",1541.8,1645.0,6.69],["2026-07-10",1475.4,1718.3,16.46],["2026-07-11",1469.5,1711.2,16.45],["2026-07-12",1415.0,1671.5,18.13],["2026-07-13",1217.6,1526.6,25.38],["2026-07-14",1414.3,1858.3,31.39],["2026-07-15",1278.3,1698.0,32.83],["2026-07-16",1181.0,1527.9,29.37],["2026-07-17",1153.0,1537.0,33.3],["2026-07-18",1152.0,1523.2,32.22],["2026-07-19",1167.9,1531.8,31.16],["2026-07-20",1200.9,1535.6,27.87],["2026-07-21",1334.0,1729.3,29.63],["2026-07-22",1295.3,1695.9,30.93],["2026-07-23",1280.5,1696.2,32.46],["2026-07-24",1165.5,1543.8,32.46],["2026-07-25",1222.6,1598.0,30.71],["2026-07-26",1248.1,1636.0,31.08],["2026-07-27",1136.2,1423.7,25.3],["2026-07-28",1070.6,1323.9,23.66],["2026-07-29",948.6,1257.7,32.59],["2026-07-30",1105.8,1536.9,38.99],["2026-07-31",1086.7,1426.4,31.26],["2026-08-01",1089.5,1448.5,32.95],["2026-08-02",1145.3,1501.0,31.06],["2026-08-03",1133.2,1468.8,29.62],["2026-08-04",1184.5,1552.7,31.08],["2026-08-05",1123.1,1477.4,31.55],["2026-08-06",1066.5,1441.2,35.13],["2026-08-07",1013.0,1380.6,36.29],["2026-08-08",1024.1,1390.4,35.77],["2026-08-09",1030.0,1400.7,35.99],["2026-08-10",988.5,1351.7,36.74],["2026-08-11",1032.9,1416.9,37.18],["2026-08-12",1116.7,1547.1,38.54],["2026-08-13",1194.7,1668.0,39.62],["2026-08-14",1168.5,1663.7,42.38],["2026-08-15",1174.4,1672.4,42.4],["2026-08-16",1173.6,1669.0,42.21],["2026-08-17",1223.0,1720.3,40.66],["2026-08-18",1096.5,1534.4,39.94],["2026-08-19",1163.5,1601.4,37.64],["2026-08-20",1206.3,1616.6,34.01],["2026-08-21",1247.7,1637.6,31.25],["2026-08-22",1248.1,1639.9,31.39],["2026-08-23",1289.4,1694.0,31.38],["2026-08-24",1159.2,1536.5,32.55],["2026-08-25",1215.6,1581.5,30.1],["2026-08-26",1281.7,1657.9,29.35],["2026-08-27",1234.5,1605.6,30.06],["2026-08-28",1198.0,1604.6,33.94],["2026-08-29",1233.0,1639.3,32.95],["2026-08-30",1158.4,1566.9,35.26],["2026-08-31",1222.5,1640.2,34.17],["2026-09-01",1190.4,1597.0,34.16],["2026-09-02",1212.7,1642.7,35.46],["2026-09-03",1192.9,1627.5,36.43],["2026-09-04",1242.9,1699.9,36.77]];
+const NS='http://www.w3.org/2000/svg';
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+function txt(x,y,s,a,p,extra){const t=el('text',Object.assign({x,y,'text-anchor':a||'start','font-size':12,'font-family':'IBM Plex Mono, Consolas, monospace',fill:'var(--muted)'},extra||{}),p);t.textContent=s;return t;}
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function lbl(iso){const d=iso.split('-');return MON[+d[1]-1]+' '+(+d[2]);}
+function ticks(min,max,n){const r=max-min;const e=Math.pow(10,Math.floor(Math.log10(r/n)));const c=[1,2,5,10].map(m=>m*e).find(s=>r/s<=n)||10*e;const out=[];for(let v=Math.ceil(min/c)*c;v<=max+1e-9;v+=c)out.push(+v.toFixed(6));return out;}
+function chart(svg,series,opt){
+  const W=980,H=+svg.getAttribute('viewBox').split(' ')[3],m={t:20,r:70,b:34,l:52};
+  const n=D.length;let ymin=Infinity,ymax=-Infinity;for(const s of series)for(const v of s.v){if(v<ymin)ymin=v;if(v>ymax)ymax=v;}
+  const pad=(ymax-ymin)*.08;const tk=ticks(ymin-pad,ymax+pad,5);ymin=Math.min(tk[0],ymin-pad);ymax=Math.max(tk[tk.length-1],ymax+pad);
+  const pw=W-m.l-m.r,ph=H-m.t-m.b,X=i=>m.l+i/(n-1)*pw,Y=v=>m.t+(ymax-v)/(ymax-ymin)*ph;
+  for(const v of tk){const y=Y(v);el('line',{x1:m.l,x2:W-m.r,y1:y,y2:y,stroke:'var(--rule)','stroke-width':1},svg);txt(m.l-8,y+4,opt.fmt(v),'end',svg);}
+  if(opt.base!=null&&opt.base>ymin&&opt.base<ymax){const y=Y(opt.base);el('line',{x1:m.l,x2:W-m.r,y1:y,y2:y,stroke:'var(--rule2)','stroke-width':1},svg);}
+  el('line',{x1:m.l,x2:W-m.r,y1:m.t+ph,y2:m.t+ph,stroke:'var(--rule2)','stroke-width':1},svg);
+  const xt=[0,6,22,37,53,n-1];for(const i of xt)txt(X(i),H-10,lbl(D[i][0]),i===0?'start':i===n-1?'end':'middle',svg);
+  for(const a of (opt.annot||[])){const x=X(a.i);el('line',{x1:x,x2:x,y1:m.t,y2:m.t+ph,stroke:'var(--rule2)','stroke-width':1,'stroke-dasharray':'3 3'},svg);txt(x+(a.left?-6:6),m.t+10,a.text,a.left?'end':'start',svg,{fill:'var(--ink2)','font-family':'Source Sans 3, system-ui, sans-serif','font-size':12.5});}
+  for(const s of series){
+    const d=s.v.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)).join('');
+    if(s.area){el('path',{d:d+'L'+X(n-1).toFixed(1)+' '+(m.t+ph).toFixed(1)+'L'+X(0).toFixed(1)+' '+(m.t+ph).toFixed(1)+'Z',fill:s.color,'fill-opacity':.1,stroke:'none'},svg);}
+    el('path',{d,fill:'none',stroke:s.color,'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round'},svg);
+    const lv=s.v[n-1];el('circle',{cx:X(n-1),cy:Y(lv),r:4.5,fill:s.color,stroke:'var(--surface)','stroke-width':2},svg);
+    txt(X(n-1)+9,Y(lv)+4,opt.fmt(lv,true),'start',svg,{fill:'var(--ink2)','font-weight':500});
+  }
+}
+const prem=D.map(r=>r[3]);
+chart(document.getElementById('c1'),[{v:prem,color:'var(--accent)',area:true}],{fmt:(v,e)=>(v<0?'−':'+')+Math.abs(v).toFixed(e?1:0)+'%',base:0,annot:[{i:5,text:'14 Jul: 49–51% intraday'},{i:20,text:'29 Jul: two-way conversion opens'},{i:37,text:'15 Aug: 42.4% high',left:true}]});
+const a0=D[0][1],b0=D[0][2];
+chart(document.getElementById('c2'),[{v:D.map(r=>r[1]/a0*100),color:'var(--kr)'},{v:D.map(r=>r[2]/b0*100),color:'var(--adr)'}],{fmt:(v,e)=>v.toFixed(e?1:0),base:100,annot:[]});
+function table(id,cols,rows){const wrap=document.getElementById(id);const t=document.createElement('table');const th=document.createElement('thead');const tr=document.createElement('tr');cols.forEach((c,i)=>{const h=document.createElement('th');if(i)h.className='num';h.textContent=c;tr.appendChild(h);});th.appendChild(tr);t.appendChild(th);const tb=document.createElement('tbody');rows.forEach(r=>{const x=document.createElement('tr');r.forEach((c,i)=>{const d=document.createElement('td');if(i)d.className='num';d.textContent=c;x.appendChild(d);});tb.appendChild(x);});t.appendChild(tb);wrap.appendChild(t);}
+table('t1',['Date','Seoul share, USD','SKHY × 10','Premium'],D.slice().reverse().map(r=>[r[0],r[1].toFixed(1),r[2].toFixed(1),(r[3]>=0?'+':'−')+Math.abs(r[3]).toFixed(2)+'%']));
+table('t2',['Date','Seoul (rebased)','SKHY × 10 (rebased)'],D.slice().reverse().map(r=>[r[0],(r[1]/a0*100).toFixed(1),(r[2]/b0*100).toFixed(1)]));
+})();
+</script>
