@@ -134,8 +134,6 @@ def load_history(range_key: str):
         fdf = fdf.rename(columns={"apr_a": "skhx_apr", "apr_b": "skhy_apr"})
         fdf["time"] = pd.to_datetime(fdf["hour"], unit="ms", utc=True)
         fdf["carry_apr"] = fdf["skhy_apr"] - fdf["skhx_apr"]
-        for c in ("skhx_apr", "skhy_apr"):   # hourly prints are noisy; a 24-print rolling mean is what the eye wants
-            fdf[c + "_24h"] = fdf[c].rolling(24, min_periods=6).mean()
     return df, fdf, interval
 
 
@@ -240,6 +238,10 @@ def sparkline(df: pd.DataFrame, live_prem: float | None) -> go.Figure:
 with st.sidebar:
     st.markdown("### Settings")
     range_key = st.radio("History range", list(RANGES), index=2, horizontal=True)
+    SMOOTH = {"1h (raw)": 1, "6h": 6, "12h": 12, "24h": 24, "3d": 72, "7d": 168, "30d": 720}
+    smooth_label = st.select_slider("Funding average window", options=list(SMOOTH), value="24h",
+                                    help="Rolling mean over this many hourly prints, applied to the funding and carry charts.")
+    smooth_h = SMOOTH[smooth_label]
     refresh = st.slider("Live refresh (seconds)", 2, 15, 4)
     st.markdown("### Alerts on mark premium")
     al_upper = st.number_input("Above (%)", value=None, step=0.5, placeholder="e.g. 40")
@@ -440,18 +442,40 @@ def history_panel() -> None:
         st.plotly_chart(two_line_chart(df, ("share", "adr10"), ("SKHYNIX", "SKHY ×10"), (C_KR, C_ADR), yprefix="$"),
                         width="stretch", key="px_chart")
     with g2:
-        st.markdown("**Funding rate, annualised %** · 24-hour average, hourly prints faint")
+        st.markdown(f"**Funding rate, annualised %** · {smooth_label} average" + (", hourly prints faint" if smooth_h > 1 else ""))
         if fdf.empty:
             st.info("No funding prints in range.")
         else:
+            for c in ("skhx_apr", "skhy_apr", "carry_apr"):
+                fdf[c + "_avg"] = fdf[c].rolling(smooth_h, min_periods=max(1, smooth_h // 4)).mean() if smooth_h > 1 else fdf[c]
             ff = go.Figure()
-            for raw, avg, name, col in (("skhx_apr", "skhx_apr_24h", "SKHYNIX", C_KR), ("skhy_apr", "skhy_apr_24h", "SKHY", C_ADR)):
-                ff.add_trace(go.Scatter(x=fdf["time"], y=fdf[raw], mode="lines", name=name + " hourly", line=dict(color=col, width=1),
-                                        opacity=0.25, hovertemplate="%{y:+,.0f}%<extra>" + name + " hourly</extra>", showlegend=False))
-                ff.add_trace(go.Scatter(x=fdf["time"], y=fdf[avg], mode="lines", name=name, line=dict(color=col, width=2),
-                                        hovertemplate="%{y:+,.0f}%<extra>" + name + " 24h avg</extra>"))
+            for raw, name, col in (("skhx_apr", "SKHYNIX", C_KR), ("skhy_apr", "SKHY", C_ADR)):
+                if smooth_h > 1:
+                    ff.add_trace(go.Scatter(x=fdf["time"], y=fdf[raw], mode="lines", line=dict(color=col, width=1), opacity=0.25,
+                                            hovertemplate="%{y:+,.0f}%<extra>" + name + " hourly</extra>", showlegend=False))
+                ff.add_trace(go.Scatter(x=fdf["time"], y=fdf[raw + "_avg"], mode="lines", name=name, line=dict(color=col, width=2),
+                                        hovertemplate="%{y:+,.0f}%<extra>" + name + f" {smooth_label}</extra>"))
             base_layout(ff, 280, ysuffix="%")
             st.plotly_chart(ff, width="stretch", key="fund_chart")
+
+    if not fdf.empty:
+        mean_carry = fdf["carry_apr"].mean()
+        st.markdown(f"**Carry · long SKHYNIX / short SKHY, annualised %** · {smooth_label} average · "
+                    f"mean over range {mean_carry:+,.0f}% APR · positive means the position receives")
+        cf = go.Figure()
+        if smooth_h > 1:
+            cf.add_trace(go.Scatter(x=fdf["time"], y=fdf["carry_apr"], mode="lines", line=dict(color=C_PREM, width=1), opacity=0.22,
+                                    hovertemplate="%{y:+,.0f}%<extra>carry hourly</extra>", showlegend=False))
+        cf.add_trace(go.Scatter(x=fdf["time"], y=[0] * len(fdf), mode="lines", line=dict(width=0), hoverinfo="skip", showlegend=False))
+        cf.add_trace(go.Scatter(x=fdf["time"], y=fdf["carry_apr_avg"], mode="lines", name="carry", line=dict(color=C_PREM, width=2),
+                                fill="tonexty", fillcolor="rgba(144,133,233,0.12)",
+                                hovertemplate="%{y:+,.0f}%<extra>carry " + smooth_label + "</extra>"))
+        cf.add_hline(y=0, line_color="#3a3548", line_width=1)
+        cf.add_hline(y=mean_carry, line_dash="dash", line_color=C_WARN, line_width=1,
+                     annotation_text=f"range mean {mean_carry:+,.0f}%", annotation_position="top left")
+        base_layout(cf, 260, ysuffix="%")
+        cf.update_layout(showlegend=False)
+        st.plotly_chart(cf, width="stretch", key="carry_chart")
     out = df[["time", "share", "adr10", "premium_pct"]].rename(columns={"time": "time_utc", "share": "skhx_usd", "adr10": "skhy_x10_usd"})
     st.download_button("Download CSV", out.to_csv(index=False).encode(), file_name=f"skhy_premium_{range_key}_{interval}.csv",
                        mime="text/csv", key="dl_hist")
