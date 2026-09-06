@@ -1,0 +1,5 @@
+# Streamlit dashboard only. analysis/ and tests/ need nothing beyond the standard library.
+streamlit>=1.45
+plotly>=5.20
+pandas>=2.2
+tzdata

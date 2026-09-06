@@ -97,3 +97,20 @@ numbers go into a model.
 fetch and WebSocket to external hosts. **Decision.** Ship the dashboard as a local file and
 publish only the (static) research note. **Why.** A live dashboard that cannot reach its
 data is worse than no dashboard.
+
+## 13. Rebuild the dashboard in Streamlit; keep the HTML file as the zero-install edition
+
+**Context.** Decision 2 chose a single HTML file for portability. Two days in, the analysis
+layer had grown into tested Python (premium math, funding sign, sessions, backtest) that the
+JavaScript could only mirror by hand, and the users this is for work in Python.
+**Decision.** `app.py` in Streamlit, importing the same `analysis/` functions the scripts and
+tests use. The live panel is an auto-refreshing fragment polling REST every few seconds;
+history, baselines and backtests are cached. The HTML file stays as the option for a
+machine where nothing can be installed. **Why.** One implementation of every number, in
+the language the desk reads and extends; a backtest tab and a calculator cost an afternoon.
+**Cost.** A Python environment and a server process; REST polling instead of the
+WebSocket feed (2 to 15 s latency rather than sub-second); each browser session is its own
+API client. **Reversal cost.** None; the HTML edition still works and is kept in the repo.
+The lesson worth stating in an interview: the first version was right for the first
+question (does this premium exist and what is it now) and wrong for the second (what does
+holding the trade actually cost), and the rewrite followed the question, not the fashion.

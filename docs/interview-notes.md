@@ -67,10 +67,16 @@ drawdown for zero price P&L."
 - Rule I follow: anything that becomes a number in front of a trader gets a source or a test.
 
 ### 7. Trade-offs I chose and can defend
-- Single file, no build: portability over tooling. Cost: JavaScript is not unit-tested; mitigated in Python.
-- Direct exchange connection per tab: simplicity over scale. Cost: rate limits at 20 tabs; fix is a shared collector.
+- Streamlit for the desk edition, HTML for the zero-install edition: one tested implementation of every number, in the language the desk uses. Cost: a Python environment and REST polling instead of the WebSocket feed.
+- Direct exchange connection per session: simplicity over scale. Cost: rate limits with many users; fix is a shared collector.
 - Flag anomalies rather than filter: transparency over cleanliness.
 - Not publishing the dashboard as a hosted page: a live tool that cannot reach its data is worse than none.
+
+### 8. Rewriting when the question changed (judgement, not sunk cost)
+- **S**: Version one was a single HTML file, chosen for portability. It answered "does this premium exist and what is it now."
+- **T**: The next question was "what does holding the trade actually cost," which needed a backtest, a calculator and the tested Python math on screen.
+- **A**: Rebuilt the dashboard in Streamlit on top of the existing `analysis/` layer, so the app imports the same functions the tests cover. Kept the HTML file as the zero-install option rather than deleting it.
+- **R**: A backtest tab and a calculator in an afternoon, every number on screen with a unit test behind it, and a decision log entry that says why the first choice was right for its question and wrong for the next one.
 
 ## Likely behavioural questions and which story to use
 
@@ -83,6 +89,7 @@ drawdown for zero price P&L."
 | A time your first answer was wrong | 5 (carry snapshot vs backtest) |
 | How do you decide what to build first | 2 (three premiums; the question a trader asks next) |
 | Describe a technical trade-off | 7 |
+| A time you changed your approach mid-project | 8 |
 | What would you do differently | Roadmap: persist ticks, shared collector, driver model, holiday calendar |
 
 ## Domain points worth having ready
@@ -102,8 +109,9 @@ drawdown for zero price P&L."
 
 ## Demo script (if there is a screen)
 
-1. Open the dashboard: point at the hero, then the three premiums and why they differ right now (which exchange is open).
-2. Click 24H, hover the chart, show the stats strip and the z-score.
-3. Show the carry tile, then run `python analysis/carry_backtest.py` and read the drawdown line.
-4. Open the research note, scroll to the case table and the fourteen questions with their status labels.
-5. Run the tests.
+1. `streamlit run app.py`. Point at the hero, then the three premiums and why they differ right now (which exchange is open; the "oracle last moved" ages).
+2. Switch the range to 24H, hover the chart, show the stats strip and the z-score. Set an alert in the sidebar.
+3. Show the carry tile, then open the Carry backtest tab and read the drawdown against the "APR" the tile shows. That contrast is the whole point.
+4. Unwind calculator: drag the target premium; note that 36% → 0% is −26.5%.
+5. Open the research note, scroll to the case table and the fourteen questions with their status labels.
+6. `python -m unittest discover -s tests -v`. Twenty-two tests, offline, under a second.

@@ -47,6 +47,11 @@ def funding_history(coin: str, start_ms: int, end_ms: int | None = None) -> list
     return info(body)
 
 
+def l2_book(coin: str) -> dict[str, Any]:
+    """Order book snapshot: {'coin', 'time', 'levels': [bids, asks]} with px/sz/n strings per level."""
+    return info({"type": "l2Book", "coin": coin})
+
+
 def asset_ctx(dex: str = "xyz") -> dict[str, dict[str, Any]]:
     """Current context (mark, oracle, funding, OI...) for every asset on a HIP-3 dex, keyed by coin."""
     meta, ctxs = info({"type": "metaAndAssetCtxs", "dex": dex})
