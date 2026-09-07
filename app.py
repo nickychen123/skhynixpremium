@@ -23,7 +23,7 @@ sys.path.insert(0, str(ROOT / "analysis"))
 import hl  # noqa: E402
 import market_hours as mh  # noqa: E402
 import metrics  # noqa: E402
-import tsmc  # noqa: E402
+import dr_history  # noqa: E402
 from calc import Scenario, average_rate, breakeven_exit_premium, carry_apr, evaluate, grid  # noqa: E402
 from carry_backtest import backtest, summarize  # noqa: E402
 from premium import align, stats, unwind_move  # noqa: E402
@@ -299,8 +299,8 @@ st.title("SKHYNIX / SKHY premium")
 st.caption("Hyperliquid HIP-3 (XYZ) · `xyz:SKHX` SK hynix common share vs `xyz:SKHY` SK hynix ADS · 10 ADSs = 1 share · "
            "premium = SKHY × 10 / SKHYNIX − 1")
 
-tab_live, tab_bt, tab_trade, tab_calc, tab_tsmc, tab_about = st.tabs(
-    ["Monitor", "Carry backtest", "Trade calculator", "Unwind calculator", "TSMC since 2000", "About"])
+tab_live, tab_bt, tab_trade, tab_calc, tab_hist, tab_about = st.tabs(
+    ["Monitor", "Carry backtest", "Trade calculator", "Unwind calculator", "ADR history", "About"])
 
 
 # ---------------------------------------------------------------- live panel
@@ -660,41 +660,83 @@ with tab_calc:
         st.caption("TSMC's ADR premium has spent most of the last twenty years between 3% and 25%; the research note explains why the level at which this premium settles is a supply decision.")
 
 
-# ---------------------------------------------------------------- TSMC tab
-@st.cache_data(ttl=86400, show_spinner="Loading TSMC history…")
-def load_tsmc():
-    snapshot = ROOT / "data" / "tsmc_premium.csv"
+# ---------------------------------------------------------------- ADR history tab
+READING = {
+    "tsmc": ("**Reading it.** The bubble regime (2000: high double digits) compressed through the 2000–01 bust and repeated "
+             "ADS supply from conversion sales; Taiwan scrapped QFII in October 2003. From about 2010 the premium settled into low single "
+             "digits, rose with foreign demand from 2020, and spiked again in the 2024 AI rally. It has never gone to zero for long: "
+             "Taiwan shares still cannot be deposited freely, and index funds must buy the ADR.\n\n"
+             "**Caveats.** Taiwan share history starts January 2000, not at the October 1997 listing. Same-date closes carry a 15-hour gap "
+             "between Taipei and New York. Both series are split-adjusted by the same stock-dividend events, so the 5:1 ratio holds; "
+             "small transient errors are possible on ex-dates. FX is the Fed's noon buying rate, forward-filled."),
+    "infosys": ("**Reading it.** The premium was above 30% almost from the first week of trading and stayed there for six and a half years, "
+                "through the 2000 bust and India's 2002 two-way-fungibility rule, which only allowed re-conversion against cancelled ADSs. "
+                "It came down after the sponsored ADS offerings of 2005 and 2006 lifted the ADS share of the company from 14% to 19%: single "
+                "digits by 2007, and within a few percent of parity every year since 2009, slightly negative today. With a large ADS float and "
+                "two-way fungibility working in practice, Infosys is the case where a 50% premium did close completely.\n\n"
+                "**Caveats.** Before July 2004 each ADS represented half a share; the adjusted series carries today's 1:1 ratio and is "
+                "continuous through the 2000 and 2004 corporate actions. Same-date closes carry a 10-hour gap between Mumbai and New York. "
+                "FX is the Fed's noon buying rate, forward-filled."),
+}
+
+
+@st.cache_data(ttl=86400, show_spinner="Loading ADR history…")
+def load_case(key: str):
+    case = dr_history.CASES[key]
+    snapshot = ROOT / "data" / f"{key}_premium.csv"
     try:
-        rows, dropped = tsmc.fetch_all()
+        rows, dropped = dr_history.fetch_case(case)
         if len(rows) < 1000:
             raise RuntimeError("short series")
         source = f"live (Yahoo closes, Federal Reserve H.10 FX) · {len(dropped)} bad vendor prints dropped"
     except Exception as e:
-        rows, source = tsmc.load_csv(snapshot), f"snapshot data/tsmc_premium.csv (live fetch failed: {e})"
+        rows, source = dr_history.load_csv(snapshot), f"snapshot data/{key}_premium.csv (live fetch failed: {e})"
     df = pd.DataFrame(rows)
     df["time"] = pd.to_datetime(df["date"])
     df["premium_pct"] = df["premium"] * 100
+    df["days"] = (df["time"] - pd.Timestamp(case.listed)).dt.days
     return df, source
 
 
-with tab_tsmc:
-    st.markdown("**The same premium, twenty-six years earlier.** TSM (NYSE, 1 ADS = 5 shares) against 2330.TW in dollars: "
-                "premium = TSM / (5 × 2330.TW ÷ USDTWD) − 1, daily closes, Taipei close against the New York close of the same date.")
+@st.cache_data(ttl=3600, show_spinner=False)
+def load_skhy_daily():
+    start = int(datetime(2026, 7, 9, tzinfo=timezone.utc).timestamp() * 1000)
+    end = hl.now_ms()
+    rows = align(hl.candles(hl.SKHX, "1d", start, end), hl.candles(hl.SKHY, "1d", start, end))
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        df["time"] = pd.to_datetime(df["t"], unit="ms", utc=True).dt.tz_localize(None)
+        df["premium_pct"] = df["premium"] * 100
+        df["days"] = (df["time"] - pd.Timestamp("2026-07-09")).dt.days
+    return df
+
+
+with tab_hist:
+    st.markdown("**The same premium in earlier lives.** ADR against the home share in dollars, daily closes, the home-market close against "
+                "the New York close of the same date. TSMC: TSM vs 2330.TW, 1 ADS = 5 shares. Infosys: INFY vs INFY.NS, 1 ADS = 1 share.")
+    sel = st.radio("Case", ["Infosys (1999→)", "TSMC (2000→)"], horizontal=True, key="hist_case")
+    key = "infosys" if sel.startswith("Infosys") else "tsmc"
+    case = dr_history.CASES[key]
     try:
-        tdf, tsrc = load_tsmc()
+        tdf, tsrc = load_case(key)
     except Exception as e:
         tdf, tsrc = pd.DataFrame(), str(e)
     if tdf.empty:
-        st.error(f"TSMC data unavailable: {tsrc}")
+        st.error(f"{case.name} data unavailable: {tsrc}")
     else:
+        first_year = int(tdf["date"].iloc[0][:4])
+        ranges = {f"All ({first_year}→)": (f"{first_year - 1}-06-01", None), "Listing to 2005": (case.listed, "2005-12-31"),
+                  "2006–2019": ("2006-01-01", "2019-12-31"), "2020→": ("2020-01-01", None),
+                  "Last 12 months": ((pd.Timestamp.today() - pd.Timedelta(days=365)).strftime("%Y-%m-%d"), None)}
         r1, r2 = st.columns([2, 3])
         with r1:
-            trange = st.radio("Range", ["All (2000→)", "2000–2004", "2005–2019", "2020→", "Last 12 months"], horizontal=False, key="tsmc_range")
-        lo, hi = {"All (2000→)": ("1999-06-01", None), "2000–2004": ("2000-01-01", "2004-12-31"), "2005–2019": ("2005-01-01", "2019-12-31"),
-                  "2020→": ("2020-01-01", None), "Last 12 months": ((pd.Timestamp.today() - pd.Timedelta(days=365)).strftime("%Y-%m-%d"), None)}[trange]
+            trange = st.radio("Range", list(ranges), key=f"hist_range_{key}")
+        lo, hi = ranges[trange]
         sub = tdf[tdf["time"] >= lo]
         if hi:
             sub = sub[sub["time"] <= hi]
+        if sub.empty:
+            sub = tdf
         with r2:
             m = st.columns(4)
             imax, imin = sub["premium_pct"].idxmax(), sub["premium_pct"].idxmin()
@@ -702,42 +744,43 @@ with tab_tsmc:
             m[1].metric("Mean in range", pct(sub["premium"].mean()))
             m[2].metric("High", pct(sub.loc[imax, "premium"]), help=str(sub.loc[imax, "date"]))
             m[3].metric("Low", pct(sub.loc[imin, "premium"]), help=str(sub.loc[imin, "date"]))
-            st.caption(f"{len(sub):,} daily closes · {sub['date'].iloc[0]} → {sub['date'].iloc[-1]} · source: {tsrc}")
+            st.caption(f"{len(sub):,} daily closes · {sub['date'].iloc[0]} → {sub['date'].iloc[-1]} · source: {tsrc} · {case.note}")
 
         fig = go.Figure()
         floor = min(sub["premium_pct"].min(), 0) - 3
         fig.add_trace(go.Scatter(x=sub["time"], y=[floor] * len(sub), mode="lines", line=dict(width=0), hoverinfo="skip", showlegend=False))
-        fig.add_trace(go.Scatter(x=sub["time"], y=sub["premium_pct"], mode="lines", name="TSMC ADR premium", line=dict(color=C_PREM, width=1.5),
-                                 fill="tonexty", fillcolor="rgba(144,133,233,0.10)", hovertemplate="%{y:+.1f}%<extra>TSM premium</extra>"))
-        if trange == "All (2000→)":
-            fig.add_trace(go.Scatter(x=[pd.Timestamp(d) for d, _, _ in tsmc.REPORTED], y=[v for _, v, _ in tsmc.REPORTED], mode="markers+text",
-                                     text=[f"{v:.0f}%" for _, v, _ in tsmc.REPORTED], textposition="top center", name="reported, pre-series",
-                                     marker=dict(symbol="diamond-open", color=C_WARN, size=10),
-                                     hovertemplate="%{text} · %{customdata}<extra>reported, not computed</extra>",
-                                     customdata=[n for _, _, n in tsmc.REPORTED]))
-        for d, label in tsmc.EVENTS:
+        fig.add_trace(go.Scatter(x=sub["time"], y=sub["premium_pct"], mode="lines", name=f"{case.name} ADR premium", line=dict(color=C_PREM, width=1.5),
+                                 fill="tonexty", fillcolor="rgba(144,133,233,0.10)", hovertemplate="%{y:+.1f}%<extra>" + case.name + "</extra>"))
+        rep = [(d, v, n) for d, v, n in case.reported if sub["time"].min() - pd.Timedelta(days=200) <= pd.Timestamp(d) <= sub["time"].max()]
+        if rep:
+            fig.add_trace(go.Scatter(x=[pd.Timestamp(d) for d, _, _ in rep], y=[v for _, v, _ in rep], mode="markers", name="reported in the literature",
+                                     marker=dict(symbol="diamond-open", color=C_WARN, size=9),
+                                     hovertemplate="%{y:.0f}% · %{customdata}<extra>reported, not computed</extra>", customdata=[n for _, _, n in rep]))
+        for d, label in case.events:
             ts = pd.Timestamp(d)
             if sub["time"].min() <= ts <= sub["time"].max():
                 fig.add_vline(x=ts, line_dash="dot", line_color=C_MUTED, line_width=1)
-                fig.add_annotation(x=ts, y=1, yref="paper", text=label, showarrow=False, xanchor="left", yanchor="top", font=dict(size=11, color="#b7b2c5"))
+                fig.add_annotation(x=ts, y=1, yref="paper", text=label, showarrow=False, xanchor="left", yanchor="top", textangle=0,
+                                   font=dict(size=10.5, color="#b7b2c5"))
         skhy_live = st.session_state.get("last_good")
         if skhy_live and ok(skhy_live.get("mark_prem")):
             fig.add_hline(y=skhy_live["mark_prem"] * 100, line_dash="dash", line_color=C_ADR, line_width=1,
                           annotation_text=f"SKHY now {skhy_live['mark_prem'] * 100:+.1f}%", annotation_position="bottom right")
         base_layout(fig, 380, ysuffix="%")
-        fig.update_yaxes(range=[floor, max(sub["premium_pct"].max(), 120 if trange == "All (2000→)" else 0) + 8])
-        st.plotly_chart(fig, width="stretch", key="tsmc_chart")
-        st.caption("Diamonds are figures reported in the press for 1999–2000, before the Taiwan share history begins; they are not computed from data. "
-                   "Dotted lines mark events. The dashed line is SKHY's live mark premium for comparison.")
+        top = max(sub["premium_pct"].max(), max([v for _, v, _ in rep], default=0))
+        fig.update_yaxes(range=[floor, top + 8])
+        st.plotly_chart(fig, width="stretch", key=f"hist_chart_{key}")
+        st.caption("Diamonds are figures reported in the literature (annual means, press prints), drawn for comparison with the computed line, not data. "
+                   "Dotted lines mark events. The dashed line is SKHY's live mark premium for scale.")
 
         st.markdown("**Regimes: premium by year**")
-        ydf = pd.DataFrame(tsmc.yearly(tdf.to_dict("records")))
+        ydf = pd.DataFrame(dr_history.yearly(tdf.to_dict("records")))
         bar = go.Figure(go.Bar(x=ydf["year"], y=ydf["mean"] * 100, marker_color=C_PREM, hovertemplate="%{y:+.1f}% mean<extra>%{x}</extra>"))
         bar.add_trace(go.Scatter(x=ydf["year"], y=ydf["max"] * 100, mode="markers", name="year high", marker=dict(color=C_WARN, size=6),
                                  hovertemplate="%{y:+.1f}% high<extra>%{x}</extra>"))
         base_layout(bar, 260, ysuffix="%")
         bar.update_layout(showlegend=False, xaxis=dict(type="category"))
-        st.plotly_chart(bar, width="stretch", key="tsmc_yearly")
+        st.plotly_chart(bar, width="stretch", key=f"hist_yearly_{key}")
         c1, c2 = st.columns([3, 2])
         with c1:
             show = ydf.copy()
@@ -746,17 +789,39 @@ with tab_tsmc:
             st.dataframe(show.rename(columns={"year": "Year", "mean": "Mean", "median": "Median", "min": "Low", "max": "High", "days": "Days"}),
                          hide_index=True, width="stretch", height=320)
         with c2:
-            st.markdown(
-                "**Reading it.** The bubble regime (2000: high double digits) compressed through the 2000–01 bust and repeated "
-                "ADS supply from conversion sales; Taiwan scrapped QFII in October 2003. From about 2010 the premium settled into low single "
-                "digits, rose with foreign demand from 2020, and spiked again in the 2024 AI rally. It has never gone to zero for long: "
-                "Taiwan shares still cannot be deposited freely, and index funds must buy the ADR.\n\n"
-                "**Caveats.** Taiwan share history starts January 2000, not at the October 1997 listing. Same-date closes carry a 15-hour gap "
-                "between Taipei and New York. Both series are split-adjusted by the same stock-dividend events, so the 5:1 ratio holds; "
-                "small transient errors are possible on ex-dates. FX is the Fed's noon buying rate, forward-filled."
-            )
-        st.download_button("Download TSMC premium CSV", tdf[["date", "tsm", "tw", "fx", "premium_pct"]].to_csv(index=False).encode(),
-                           file_name="tsmc_premium.csv", mime="text/csv", key="dl_tsmc")
+            st.markdown(READING[key])
+        st.download_button(f"Download {case.name} premium CSV", tdf[["date", "adr", "local", "fx", "premium_pct"]].to_csv(index=False).encode(),
+                           file_name=f"{key}_premium.csv", mime="text/csv", key=f"dl_{key}")
+
+    st.markdown("---")
+    st.markdown("**Since listing: SKHY against the precedents, by days after the ADR's first trading day**")
+    horizon = st.radio("Horizon", ["First 90 days", "First year", "First 3 years", "Whole life"], horizontal=True, key="hist_horizon")
+    hmax = {"First 90 days": 90, "First year": 365, "First 3 years": 3 * 365, "Whole life": None}[horizon]
+    cmp_fig = go.Figure()
+    for k, col in (("infosys", C_KR), ("tsmc", C_ADR)):
+        try:
+            cdf, _ = load_case(k)
+        except Exception:
+            continue
+        c = cdf if hmax is None else cdf[cdf["days"] <= hmax]
+        if not c.empty:
+            nm = dr_history.CASES[k].name
+            cmp_fig.add_trace(go.Scatter(x=c["days"], y=c["premium_pct"], mode="lines", name=nm, line=dict(color=col, width=1.5),
+                                         hovertemplate="day %{x}: %{y:+.1f}%<extra>" + nm + "</extra>"))
+    try:
+        sdf = load_skhy_daily()
+    except Exception:
+        sdf = pd.DataFrame()
+    if not sdf.empty:
+        s = sdf if hmax is None else sdf[sdf["days"] <= hmax]
+        cmp_fig.add_trace(go.Scatter(x=s["days"], y=s["premium_pct"], mode="lines", name="SKHY (2026)", line=dict(color=C_PREM, width=2.5),
+                                     hovertemplate="day %{x}: %{y:+.1f}%<extra>SKHY</extra>"))
+    base_layout(cmp_fig, 320, ysuffix="%")
+    cmp_fig.update_xaxes(title_text="days since ADR listing")
+    cmp_fig.update_layout(hovermode="closest")
+    st.plotly_chart(cmp_fig, width="stretch", key="hist_compare")
+    st.caption("Infosys runs from its first trading day. TSMC starts at day 818 because its Taiwan share history begins in January 2000. "
+               "SKHY is the Hyperliquid perp-based daily series from 9 July 2026.")
 
 
 # ---------------------------------------------------------------- about tab

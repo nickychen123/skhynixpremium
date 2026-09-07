@@ -82,6 +82,7 @@ drawdown for zero price P&L."
 - **S**: Wanted TSMC's premium on the dashboard back to its 1997 listing. Free sources each covered part of it: Yahoo had the ADR from 1997 and Taiwan shares from 2000 but exchange rates only from 2004; Stooq was behind a bot wall; FRED timed out; the Taiwan exchange's endpoint starts in 2010.
 - **A**: Found the Federal Reserve's H.10 historical pages with daily USD/TWD back to 1990 and wrote a parser with a unit test on the page format. Made the Fed series authoritative and used Yahoo only for the days after the last weekly print, after Yahoo's FX history produced two impossible premiums near −90%. Added a range check that drops vendor errors and shows the count. Represented the 1997–1999 gap with labelled press figures rather than filling it.
 - **R**: A daily series from 2000 whose yearly means match the literature (about +50% in 2000, low single digits in the 2010s, +16% in 2024). The distinction between a vendor error (drop, count) and a market anomaly (keep, annotate) is a rule I can state.
+- **Follow-up (Infosys)**: generalised the pipeline to a per-company case record and validated it before trusting it: computed 2001–2005 annual means of 57, 61, 46, 49, 35% against the published 57, 61, 46, 49, 36%. The validation caught my own error: a correction factor I had added for a split-date mismatch produced +300% prints, and the data showed it wasn't needed. Removed it, kept the mechanism under test. Infosys is also the counter-case worth citing: its premium closed completely by 2009 after sponsored ADS offerings took the float to a fifth of the company, while TSMC's never did.
 
 ### 10. Building the calculator people ask for after the backtest
 - **S**: The backtest answered "what happened"; the next question was "what if the premium goes from here to there over N days at this funding rate".
@@ -125,7 +126,7 @@ drawdown for zero price P&L."
 2. Switch the range to 24H, hover the chart, show the stats strip and the z-score. Set an alert in the sidebar.
 3. Show the carry tile, then open the Carry backtest tab and read the drawdown against the "APR" the tile shows. That contrast is the whole point.
 4. Trade calculator: pick "Last 7d", click "Use these averages", set the exit premium, read the breakeven and the sensitivity grid.
-5. TSMC tab: point at 2000, then the 2010s, then 2024; the dashed line is SKHY today. Twenty-six years and it never settled at zero.
+5. ADR history tab: Infosys first (above 30% for six years, then parity from 2009), then TSMC (never settled at zero), then the "since listing" chart with SKHY's first two months against Infosys's first year. The dashed line is SKHY today.
 6. Unwind calculator: drag the target premium; note that 36% → 0% is −26.5%.
 7. Open the research note, scroll to the case table and the fourteen questions with their status labels.
 8. `python -m unittest discover -s tests -v`. Forty tests, offline, under a second.

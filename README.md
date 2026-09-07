@@ -7,8 +7,8 @@ Four parts, one tested data layer:
 
 | Part | What it is | Where |
 |---|---|---|
-| Streamlit app | Live monitor with mark, oracle and executable premiums, funding carry, session clocks, history charts with range statistics, alerts; a carry backtest; a scenario calculator (entry and exit premium, holding period, funding averaged over any window, fees, leverage, sensitivity grid); an unwind calculator; and TSMC's ADR premium since 2000 for comparison. | [`app.py`](app.py) |
-| Analysis layer | Standard-library Python: API client, derived metrics, premium series and statistics, venue sessions, carry backtest, scenario calculator, TSMC premium pipeline. 40 unit tests. | [`analysis/`](analysis), [`tests/`](tests) |
+| Streamlit app | Live monitor with mark, oracle and executable premiums, funding carry, session clocks, history charts with range statistics and a configurable averaging window, alerts; a carry backtest; a scenario calculator (entry and exit premium, holding period, funding averaged over any window, fees, leverage, sensitivity grid); an unwind calculator; and the ADR premium histories of Infosys (from its 1999 listing) and TSMC (from 2000), with SKHY overlaid by days since listing. | [`app.py`](app.py) |
+| Analysis layer | Standard-library Python: paginating API client, derived metrics, premium series and statistics, venue sessions, carry backtest, scenario calculator, depositary-receipt history pipeline. 50 unit tests. | [`analysis/`](analysis), [`tests/`](tests) |
 | Research note | Why restricted-conversion depositary receipts carry premiums, what ended TSMC's and Infosys's, and what would end this one. Sources graded by quality. | [`research/skhy-adr-premium.html`](research/skhy-adr-premium.html) |
 | Zero-install monitor | The original single HTML file: WebSocket feed, same tiles and charts, no Python needed. For a machine where nothing can be installed. | [`index.html`](index.html) |
 
@@ -43,7 +43,8 @@ python -m unittest discover -s tests -v                    # 40 offline tests, n
 HL_LIVE=1 python -m unittest tests.test_premium.LiveSmoke   # checks both markets exist and the ratio is sane
 python analysis/premium.py --interval 1d --csv data/premium_daily.csv
 python analysis/carry_backtest.py --start 2026-07-15 --csv data/carry_backtest.csv
-python analysis/tsmc.py --csv data/tsmc_premium.csv         # TSMC ADR premium, daily since 2000
+python analysis/dr_history.py --case tsmc --csv data/tsmc_premium.csv        # TSMC ADR premium, daily since 2000
+python analysis/dr_history.py --case infosys --csv data/infosys_premium.csv  # Infosys ADR premium, daily since 1999
 ```
 
 The analysis scripts and tests need nothing beyond Python 3.10+. The HTML monitor needs
@@ -91,7 +92,7 @@ test. `app.py` only fetches, formats and lays out.
 - **Carry backtest**: long 1 SKHYNIX / short 10 SKHY from any date since listing, hourly, with the exchange's actual funding prints. Price, funding and total P&L, drawdown, CSV download.
 - **Trade calculator**: expected P&L for a scenario: entry and exit premium, Seoul price change, holding period, hourly funding on each leg (one click fills in the average over the last 24h, 7d, 30d, since listing or a custom window), fees, leverage. Returns price, funding and fee P&L, return on margin, annualised return, breakeven exit premium, and a sensitivity grid of exit premium against holding period.
 - **Unwind calculator**: how far the ADR falls for any target premium, and how far Seoul would have to rise instead.
-- **TSMC since 2000**: the same premium for TSM against 2330.TW, daily since January 2000, with event markers, reported 1999–2000 figures shown as labelled markers, a by-year regime chart and table, and SKHY's live premium drawn across it for scale.
+- **ADR history**: the same premium for Infosys (INFY against INFY.NS, from the first ADR trading day in March 1999) and TSMC (TSM against 2330.TW, from January 2000), with event markers, figures from the literature drawn as markers for comparison, a by-year regime chart and table, SKHY's live premium for scale, and a "since listing" chart that overlays SKHY on both precedents by days after the ADR's first trade.
 - **Alerts**: upper/lower thresholds and a |z| ≥ 2 regime alert, edge-triggered with hysteresis, shown as toasts and kept in a log.
 
 Live data is polled over REST inside auto-refreshing Streamlit fragments (2 to 15 s); history is cached for a minute, baselines and backtests for five.
@@ -112,6 +113,12 @@ TSMC's ADR premium, computed the same way from 2000 (yearly means): 2000 +50%, 2
 2020, +11% in 2021, +16% in 2024, +23% in 2025, +16% so far in 2026, +13% on the last close.
 Twenty-six years on it has never settled at zero.
 
+Infosys, computed the same way from its first ADR trading day: 1999 +59%, 2000 +93% (peak
+above 190%), then +57%, +61%, +46%, +49%, +35% for 2001–2005, which matches the published
+annual figures to within a point. +13% in 2006, +6% in 2007, and within a few percent of
+parity every year since 2009. Infosys is the case where a 50% premium closed completely,
+after sponsored ADS offerings took the ADS float to a fifth of the company.
+
 The row on the compression trade is the reason the tool exists. On any given day the carry tile can show a
 three-digit APR for the compression trade; over seven weeks the funding netted out
 negative and the position spent most of its life under water. The premium is a
@@ -131,7 +138,7 @@ Short version; the reasoning and the rejected alternatives are in [`docs/decisio
 
 - Session indicators ignore exchange holidays.
 - History comes from perp candle closes, which track the oracles within roughly 0.5% but are not exchange prints.
-- TSMC: no free daily source for 2330.TW before 2000, so the computed series starts 27 months after the ADR listed; 1999–2000 figures from the press are shown as markers, not data. Closes are split-adjusted on both sides by the same stock-dividend events; FX is the Fed's noon rate, forward-filled; two bad vendor FX ticks are dropped and counted.
+- TSMC: no free daily source for 2330.TW before 2000, so the computed series starts 27 months after the ADR listed; 1999–2000 figures from the press are shown as markers, not data. Infosys has full coverage from listing. Closes are split-adjusted on both sides by the same corporate events (Infosys's 2004 change from half a share to one share per ADS is absorbed by the 4:1 local and 2:1 ADR adjustments); FX is the Fed's noon rate, forward-filled, with Yahoo used only after the last weekly print.
 - The scenario calculator assumes constant funding and a linear price path, and ignores liquidation and mark-versus-oracle basis.
 - The Streamlit app polls REST every few seconds per open session; a shared collector would be needed for many users.
 - No persistence: the alert log lives in the session. Export CSV or run the scripts for durable data.

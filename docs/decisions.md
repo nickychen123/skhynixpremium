@@ -145,3 +145,19 @@ rather than interpolation. **Why.** Yahoo's FX history had two impossible ticks 
 the source, and a range check drops anything similar with a visible count. This is
 different from decision 6: those were vendor errors, not market prints. **Cost.** The
 computed series starts 27 months after the listing; same-date closes are 15 hours apart.
+
+## 16. One pipeline for every precedent, validated against the literature before trusting it
+
+**Context.** Infosys was the note's strongest analogue for persistence and the user wanted
+it on the dashboard. **Decision.** Generalise the TSMC script into `dr_history.py` with a
+`Case` record per company (symbols, Fed FX file, ADS ratio, sanity bounds, reported figures,
+events) and one set of functions; `tsmc.py` stays as a thin wrapper so nothing that
+imported it breaks. **Validation.** The computed Infosys annual means for 2001–2005 (56.9,
+61.1, 46.0, 48.6, 35.2%) match Saxena's published table (57, 61, 46, 49, 36%) and March 2000
+lands on Lamont's 136%. That check also caught a mistake of mine: I had added a factor for the
+early-2000 window where Mumbai and New York went ex a split on different dates, and the data
+showed the adjusted series was already continuous there, so the factor produced +300%
+prints and was removed. The mechanism stays (tested) with no case using it. **Why.** A
+series that reproduces published numbers can carry an argument; one that does not is a
+liability however pretty the chart. **Cost.** Yahoo is the only free source for the home
+shares, so the pipeline inherits its corporate-action handling.
