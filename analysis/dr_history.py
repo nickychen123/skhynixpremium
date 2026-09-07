@@ -41,16 +41,39 @@ class Case:
     listed: str                  # ADR listing date
     fx_bounds: tuple[float, float]
     premium_bounds: tuple[float, float]
+    country: str = ""
+    convertibility: str = ""     # "restricted", "fungible", or a short phrase
+    start: str | None = None     # drop rows before this date (vendor data inconsistent earlier)
     adr_windows: tuple[tuple[str, str, float], ...] = ()   # (start, end_exclusive, factor) applied to the ADR close
     reported: tuple[tuple[str, float, str], ...] = ()      # (date, premium %, note) from the literature, for markers
     events: tuple[tuple[str, str], ...] = ()
     note: str = ""
+    reading: str = ""
 
+
+# Window factors below come from reconciling Yahoo's split-event lists on the two listings. A corporate
+# action recorded on the home listing only inflates the computed premium by its factor for every date
+# before it; one recorded on the ADR only deflates it. The factor applied to the ADR close is
+# (ADR-only factors after t) / (home-only factors after t). Each was checked against the observed
+# step in the series before being adopted.
+_FUNGIBLE = ("**Reading it.** A freely convertible ADR: anyone can deposit home shares to create ADSs or cancel ADSs to get "
+             "shares back, so any gap is arbitraged within transaction costs. The line is noise around zero, which is the point: "
+             "this is what SKHY would look like if its ADS quota were open.\n\n"
+             "**Caveats.** Home and New York closes are hours apart on the same date. Shown from the first date on which Yahoo's "
+             "corporate-action adjustments are consistent on both listings, with documented factors where a bonus issue was "
+             "recorded on one listing only.")
 
 CASES: dict[str, Case] = {
     "tsmc": Case(
         key="tsmc", name="TSMC", adr="TSM", local="2330.TW", fx_yahoo="TWD=X", fx_fed=("dat96_ta", "dat00_ta"),
-        ratio=5, listed="1997-10-08", fx_bounds=(20.0, 45.0), premium_bounds=(-0.5, 1.5),
+        ratio=5, listed="1997-10-08", fx_bounds=(20.0, 45.0), premium_bounds=(-0.5, 1.5), country="Taiwan", convertibility="restricted",
+        reading=("**Reading it.** The bubble regime (2000: high double digits) compressed through the 2000–01 bust and repeated "
+                 "ADS supply from conversion sales; Taiwan scrapped QFII in October 2003. From about 2010 the premium settled into low single "
+                 "digits, rose with foreign demand from 2020, and spiked again in the 2024 AI rally. It has never gone to zero for long: "
+                 "Taiwan shares still cannot be deposited freely, and index funds must buy the ADR.\n\n"
+                 "**Caveats.** Taiwan share history starts January 2000, not at the October 1997 listing. Same-date closes carry a 15-hour gap "
+                 "between Taipei and New York. Both series are split-adjusted by the same stock-dividend events, so the 5:1 ratio holds; "
+                 "small transient errors are possible on ex-dates. FX is the Fed's noon buying rate, forward-filled."),
         reported=(("1999-07-13", 31.75, "reported 12-month low"),
                   ("2000-01-26", 115.0, "reported intraday high"),
                   ("2000-01-28", 67.0, "reported close (Economist: about 70%)")),
@@ -61,7 +84,15 @@ CASES: dict[str, Case] = {
     ),
     "infosys": Case(
         key="infosys", name="Infosys", adr="INFY", local="INFY.NS", fx_yahoo="INR=X", fx_fed=("dat96_in", "dat00_in"),
-        ratio=1, listed="1999-03-11", fx_bounds=(30.0, 120.0), premium_bounds=(-0.5, 2.5),
+        ratio=1, listed="1999-03-11", fx_bounds=(30.0, 120.0), premium_bounds=(-0.5, 2.5), country="India", convertibility="restricted",
+        reading=("**Reading it.** The premium was above 30% almost from the first week of trading and stayed there for six and a half years, "
+                 "through the 2000 bust and India's 2002 two-way-fungibility rule, which only allowed re-conversion against cancelled ADSs. "
+                 "It came down after the sponsored ADS offerings of 2005 and 2006 lifted the ADS share of the company from 14% to 19%: single "
+                 "digits by 2007, and within a few percent of parity every year since 2009, slightly negative today. With a large ADS float and "
+                 "two-way fungibility working in practice, Infosys is the case where a 50% premium did close completely.\n\n"
+                 "**Caveats.** Before July 2004 each ADS represented half a share; the adjusted series carries today's 1:1 ratio and is "
+                 "continuous through the 2000 and 2004 corporate actions. Same-date closes carry a 10-hour gap between Mumbai and New York. "
+                 "FX is the Fed's noon buying rate, forward-filled."),
         # Yahoo dates the 2000 split 2000-01-27 in Mumbai and 2000-02-15 in New York, but the adjusted
         # series are continuous through that window without a factor (checked: +100% on 26 Jan,
         # +106% on 27 Jan), so no window correction is applied. The 2004 ratio change (half a share
@@ -80,7 +111,97 @@ CASES: dict[str, Case] = {
         note="Full history from the first ADR trading day. Before July 2004 each ADS represented half a share; "
              "the adjusted series carries today's 1:1 ratio throughout.",
     ),
+    "wipro": Case(
+        key="wipro", name="Wipro", adr="WIT", local="WIPRO.NS", fx_yahoo="INR=X", fx_fed=("dat96_in", "dat00_in"),
+        ratio=1, listed="2000-10-19", fx_bounds=(30.0, 120.0), premium_bounds=(-0.5, 2.0), country="India", convertibility="restricted",
+        # ADR-only: 2013-04-09 x1.121 (demerger consideration). Home-only: 2019-03-06 x1.333 (1:3 bonus).
+        adr_windows=(("2000-01-01", "2013-04-09", 1.121 / 1.3333), ("2013-04-09", "2019-03-06", 1 / 1.3333)),
+        reported=(("2001-07-01", 2.0, "Saxena 2006: 2001 mean"), ("2002-07-01", 3.0, "Saxena 2006: 2002 mean"),
+                  ("2003-07-01", 12.0, "Saxena 2006: 2003 mean"), ("2004-07-01", 37.0, "Saxena 2006: 2004 mean"),
+                  ("2005-07-01", 27.0, "Saxena 2006: 2005 mean"), ("2005-07-05", 20.45, "Bloomberg table, 5 Jul 2005")),
+        events=(("2002-02-13", "RBI: two-way fungibility, re-conversion up to cancellations"),),
+        note="ADR listed October 2000. Corrected for two corporate actions Yahoo recorded on one listing only (2013, 2019).",
+        reading=("**Reading it.** Wipro listed at a discount and stayed near parity until 2003, then built a premium that peaked around "
+                 "40% in 2004 and again in 2014–2016 with a very small ADS float, before collapsing to zero from 2019. Same country and "
+                 "rules as Infosys, very different path: the float and the demand set the level, the rules only set the ceiling.\n\n"
+                 "**Caveats.** Two corporate actions were recorded on one listing only in the vendor data (the 2013 demerger "
+                 "consideration on the ADR, the 2019 bonus on the share); the series is corrected by the documented factors and the "
+                 "2001–2005 annual means then match the published table within a point."),
+    ),
+    "drreddy": Case(
+        key="drreddy", name="Dr. Reddy's", adr="RDY", local="DRREDDY.NS", fx_yahoo="INR=X", fx_fed=("dat96_in", "dat00_in"),
+        ratio=1, listed="2001-04-11", fx_bounds=(30.0, 120.0), premium_bounds=(-0.5, 1.5), country="India", convertibility="restricted",
+        reported=(("2005-07-05", -4.03, "Bloomberg table, 5 Jul 2005"),),
+        note="ADR listed April 2001; adjustments consistent throughout.",
+        reading=("**Reading it.** An Indian ADR under the same headroom rule as Infosys that never carried a premium: a few percent in "
+                 "its first year and parity since. The restriction is necessary for a premium, not sufficient; there has to be more "
+                 "US demand than ADS supply, and for a pharmaceutical name in 2001 there was not.\n\n"
+                 "**Caveats.** Mumbai and New York closes are 10 hours apart on the same date."),
+    ),
+    "cemex": Case(
+        key="cemex", name="CEMEX", adr="CX", local="CEMEXCPO.MX", fx_yahoo="MXN=X", fx_fed=("dat96_mx", "dat00_mx"),
+        ratio=10, listed="1999-09-15", fx_bounds=(5.0, 30.0), premium_bounds=(-0.5, 1.0), country="Mexico", convertibility="fungible",
+        # Home-only stock dividends: 2005-05-06 x1.0391, 2010-06-02 x1.04, 2011-03-25 x1.04. The 2005 CPO split
+        # doubled the ADS ratio from 5 to 10 CPOs and needs no factor.
+        adr_windows=(("1999-01-01", "2005-05-06", 1 / (1.0391 * 1.04 * 1.04)), ("2005-05-06", "2010-06-02", 1 / (1.04 * 1.04)),
+                     ("2010-06-02", "2011-03-25", 1 / 1.04)),
+        note="Corrected for three stock dividends recorded on the CPO listing only; the 2005 ratio change (5 to 10 CPOs per ADS) is absorbed by the CPO split.",
+        reading=_FUNGIBLE,
+    ),
+    "femsa": Case(
+        key="femsa", name="FEMSA", adr="FMX", local="FEMSAUBD.MX", fx_yahoo="MXN=X", fx_fed=("dat96_mx", "dat00_mx"),
+        ratio=10, listed="1998-05-11", fx_bounds=(5.0, 30.0), premium_bounds=(-0.5, 1.0), country="Mexico", convertibility="fungible",
+        start="2005-06-01", note="Shown from June 2005; an unlisted adjustment shifts the earlier vendor series by a constant 6%.",
+        reading=_FUNGIBLE,
+    ),
+    "amx": Case(
+        key="amx", name="América Móvil", adr="AMX", local="AMXB.MX", fx_yahoo="MXN=X", fx_fed=("dat96_mx", "dat00_mx"),
+        ratio=20, listed="2001-02-07", fx_bounds=(5.0, 30.0), premium_bounds=(-0.5, 1.0), country="Mexico", convertibility="fungible",
+        start="2023-10-01", note="Shown from October 2023: the ADR represented L shares, which merged into the B series in 2023; the earlier B-share history is a different security.",
+        reading=_FUNGIBLE,
+    ),
+    "vale": Case(
+        key="vale", name="Vale", adr="VALE", local="VALE3.SA", fx_yahoo="BRL=X", fx_fed=("dat96_bz", "dat00_bz"),
+        ratio=1, listed="2002-03-21", fx_bounds=(0.5, 10.0), premium_bounds=(-0.5, 1.0), country="Brazil", convertibility="fungible",
+        note="Common-share ADR; adjustments consistent throughout.", reading=_FUNGIBLE,
+    ),
+    "bradesco": Case(
+        key="bradesco", name="Bradesco", adr="BBD", local="BBDC4.SA", fx_yahoo="BRL=X", fx_fed=("dat96_bz", "dat00_bz"),
+        ratio=1, listed="2001-11-21", fx_bounds=(0.5, 10.0), premium_bounds=(-0.5, 1.0), country="Brazil", convertibility="fungible",
+        # Home-only 10% bonuses: 2020-04-14, 2021-04-19, 2022-04-19. Earlier years have unresolved mismatches and are not shown.
+        start="2018-04-02",
+        adr_windows=(("2018-04-02", "2020-04-14", 1 / 1.331), ("2020-04-14", "2021-04-19", 1 / 1.21), ("2021-04-19", "2022-04-19", 1 / 1.1)),
+        note="Preferred-share ADR, shown from April 2018 with three home-only bonus issues corrected; earlier vendor data has unresolved mismatches.",
+        reading=_FUNGIBLE,
+    ),
+    "itau": Case(
+        key="itau", name="Itaú Unibanco", adr="ITUB", local="ITUB4.SA", fx_yahoo="BRL=X", fx_fed=("dat96_bz", "dat00_bz"),
+        ratio=1, listed="2002-02-21", fx_bounds=(0.5, 10.0), premium_bounds=(-0.5, 1.0), country="Brazil", convertibility="fungible",
+        # Home-only bonuses 2009-08-31 x1.1 and 2015-07-14 x1.1; ADR-only 2021-10-04 x1.213.
+        adr_windows=(("2002-01-01", "2009-08-31", 1.213 / 1.21), ("2009-08-31", "2015-07-14", 1.213 / 1.1), ("2015-07-14", "2021-10-04", 1.213)),
+        note="Preferred-share ADR; corrected for three corporate actions recorded on one listing only (2009, 2015, 2021).",
+        reading=_FUNGIBLE,
+    ),
+    "gerdau": Case(
+        key="gerdau", name="Gerdau", adr="GGB", local="GGBR4.SA", fx_yahoo="BRL=X", fx_fed=("dat96_bz", "dat00_bz"),
+        ratio=1, listed="1999-03-10", fx_bounds=(0.5, 10.0), premium_bounds=(-0.5, 1.0), country="Brazil", convertibility="fungible",
+        start="2009-02-01", note="Shown from February 2009; the vendor's 2000–2002 share history is mis-scaled and 2008 is unreliable.",
+        reading=_FUNGIBLE,
+    ),
+    "petrobras": Case(
+        key="petrobras", name="Petrobras", adr="PBR", local="PETR3.SA", fx_yahoo="BRL=X", fx_fed=("dat96_bz", "dat00_bz"),
+        ratio=2, listed="2000-08-10", fx_bounds=(0.5, 10.0), premium_bounds=(-0.5, 1.0), country="Brazil", convertibility="fungible",
+        note="Common-share ADR, 1 ADS = 2 shares; adjustments consistent throughout.", reading=_FUNGIBLE,
+    ),
 }
+
+# Companies in the source table for which no free price history exists (ADR delisted; Yahoo drops delisted symbols).
+UNAVAILABLE = (
+    ("Satyam", "India", "ADR delisted after the 2009 fraud; merged into Tech Mahindra 2013"),
+    ("Tata Motors", "India", "ADR delisted from the NYSE in January 2023"),
+    ("Telmex", "Mexico", "taken private by América Móvil in 2012"),
+    ("Homex", "Mexico", "ADR delisted in 2014 after bankruptcy"),
+)
 
 
 def _get(url: str, timeout: int = 25) -> bytes:
@@ -174,7 +295,21 @@ def fetch_case(case: Case) -> tuple[list[dict], list[dict]]:
         pass
     if not fx:
         raise RuntimeError("no FX source reachable")
-    return clean(build(adr, local, fx, case.ratio, case.adr_windows), case.fx_bounds, case.premium_bounds)
+    rows = build(adr, local, fx, case.ratio, case.adr_windows)
+    if case.start:
+        rows = [r for r in rows if r["date"] >= case.start]
+    return clean(rows, case.fx_bounds, case.premium_bounds)
+
+
+def frame(rows: list[dict], case: Case):
+    """rows -> pandas DataFrame with time, premium_pct and days-since-listing columns (pandas imported lazily)."""
+    import pandas as pd
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        df["time"] = pd.to_datetime(df["date"])
+        df["premium_pct"] = df["premium"] * 100
+        df["days"] = (df["time"] - pd.Timestamp(case.listed)).dt.days
+    return df
 
 
 def write_csv(rows: list[dict], path: Path) -> None:

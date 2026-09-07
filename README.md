@@ -92,7 +92,7 @@ test. `app.py` only fetches, formats and lays out.
 - **Carry backtest**: long 1 SKHYNIX / short 10 SKHY from any date since listing, hourly, with the exchange's actual funding prints. Price, funding and total P&L, drawdown, CSV download.
 - **Trade calculator**: expected P&L for a scenario: entry and exit premium, Seoul price change, holding period, hourly funding on each leg (one click fills in the average over the last 24h, 7d, 30d, since listing or a custom window), fees, leverage. Returns price, funding and fee P&L, return on margin, annualised return, breakeven exit premium, and a sensitivity grid of exit premium against holding period.
 - **Unwind calculator**: how far the ADR falls for any target premium, and how far Seoul would have to rise instead.
-- **ADR history**: the same premium for Infosys (INFY against INFY.NS, from the first ADR trading day in March 1999) and TSMC (TSM against 2330.TW, from January 2000), with event markers, figures from the literature drawn as markers for comparison, a by-year regime chart and table, SKHY's live premium for scale, and a "since listing" chart that overlays SKHY on both precedents by days after the ADR's first trade.
+- **ADR history**: twelve precedents computed the same way. Restricted markets: Infosys (from its first ADR day in March 1999), Wipro, Dr. Reddy's, TSMC. Freely convertible control group: CEMEX, FEMSA, América Móvil, Vale, Bradesco, Itaú, Gerdau, Petrobras. A summary table (coverage, first-three-year mean, peak, latest), a per-case chart with events and published figures drawn as markers, by-year regimes, and a "since listing" chart that overlays SKHY on any selection of precedents by days after the ADR's first trade. Satyam, Tata Motors, Telmex and Homex are listed as unavailable: their ADRs were delisted and no free history survives.
 - **Alerts**: upper/lower thresholds and a |z| ≥ 2 regime alert, edge-triggered with hysteresis, shown as toasts and kept in a log.
 
 Live data is polled over REST inside auto-refreshing Streamlit fragments (2 to 15 s); history is cached for a minute, baselines and backtests for five.
@@ -119,6 +119,14 @@ annual figures to within a point. +13% in 2006, +6% in 2007, and within a few pe
 parity every year since 2009. Infosys is the case where a 50% premium closed completely,
 after sponsored ADS offerings took the ADS float to a fifth of the company.
 
+Across the twelve precedents the pattern is binary. The four restricted-conversion names
+(Infosys, Wipro, Dr. Reddy's, TSMC) carried premiums of 0% to 90% depending on US demand
+against a fixed float: Wipro ran 25% to 48% through 2009–2016 with a tiny ADS float and
+collapsed to zero from 2022, while Dr. Reddy's under the same Indian rules never exceeded a
+few percent. The eight freely convertible Brazilian and Mexican ADRs sit within a percent of
+parity in every year of coverage. The rule sets the ceiling; float and demand set the level;
+free conversion removes the premium entirely.
+
 The row on the compression trade is the reason the tool exists. On any given day the carry tile can show a
 three-digit APR for the compression trade; over seven weeks the funding netted out
 negative and the position spent most of its life under water. The premium is a
@@ -139,6 +147,7 @@ Short version; the reasoning and the rejected alternatives are in [`docs/decisio
 - Session indicators ignore exchange holidays.
 - History comes from perp candle closes, which track the oracles within roughly 0.5% but are not exchange prints.
 - TSMC: no free daily source for 2330.TW before 2000, so the computed series starts 27 months after the ADR listed; 1999–2000 figures from the press are shown as markers, not data. Infosys has full coverage from listing. Closes are split-adjusted on both sides by the same corporate events (Infosys's 2004 change from half a share to one share per ADS is absorbed by the 4:1 local and 2:1 ADR adjustments); FX is the Fed's noon rate, forward-filled, with Yahoo used only after the last weekly print.
+- Where Yahoo recorded a bonus issue on one listing only (Wipro 2013 and 2019, CEMEX 2005–2011, Itaú 2009–2021, Bradesco 2020–2022), the series carries a documented correction factor derived from the two split-event lists and checked against the observed step. Where mismatches could not be resolved, the series starts later (FEMSA 2005, Gerdau 2009, Bradesco 2018, América Móvil after its 2023 share-class merger). The test that identified these: a freely convertible ADR cannot hold a step-shaped premium.
 - The scenario calculator assumes constant funding and a linear price path, and ignores liquidation and mark-versus-oracle basis.
 - The Streamlit app polls REST every few seconds per open session; a shared collector would be needed for many users.
 - No persistence: the alert log lives in the session. Export CSV or run the scripts for durable data.

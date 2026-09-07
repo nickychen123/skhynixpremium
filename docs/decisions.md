@@ -161,3 +161,24 @@ prints and was removed. The mechanism stays (tested) with no case using it. **Wh
 series that reproduces published numbers can carry an argument; one that does not is a
 liability however pretty the chart. **Cost.** Yahoo is the only free source for the home
 shares, so the pipeline inherits its corporate-action handling.
+
+## 17. Add a control group, and reconcile corporate actions instead of trusting the vendor
+
+**Context.** The user asked for the fifteen companies in a paper's dataset: five Indian, five
+Mexican, five Brazilian. Four have delisted ADRs with no surviving free history. The other
+ten built, but the first pass produced impossible series: Itaú's ADR at an 18% discount for
+six years, Bradesco's at a 47% premium for nine, América Móvil at a constant +5% for two
+decades. **Diagnosis.** A freely convertible ADR cannot hold a step-shaped premium, so every
+step had to be a data artefact. Pulling both listings' split-event lists showed each step
+matching a bonus issue Yahoo had recorded on one listing only, in the direction and size the
+arithmetic predicts (a home-only factor f inflates the computed premium by f for every
+earlier date; an ADR-only factor deflates it). **Decision.** Encode per-case correction
+factors derived from the event lists and confirmed against the observed steps; start a
+series later where a mismatch could not be traced to an event; list the four delisted
+names explicitly as unavailable rather than dropping them silently. **Validation.** Wipro's
+corrected 2001–2005 means match the published table within a point; every convertible ADR
+sits within a percent of parity in every year. **Why it matters.** The control group turns
+the argument from "restricted ADRs have premiums" into "restriction is the only thing that
+produces one": same vendor, same method, same years, eight names at zero and four with
+premiums. **Cost.** Shorter coverage for four names, and a dependence on Yahoo's event lists
+being merely incomplete rather than wrong.

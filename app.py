@@ -661,41 +661,24 @@ with tab_calc:
 
 
 # ---------------------------------------------------------------- ADR history tab
-READING = {
-    "tsmc": ("**Reading it.** The bubble regime (2000: high double digits) compressed through the 2000–01 bust and repeated "
-             "ADS supply from conversion sales; Taiwan scrapped QFII in October 2003. From about 2010 the premium settled into low single "
-             "digits, rose with foreign demand from 2020, and spiked again in the 2024 AI rally. It has never gone to zero for long: "
-             "Taiwan shares still cannot be deposited freely, and index funds must buy the ADR.\n\n"
-             "**Caveats.** Taiwan share history starts January 2000, not at the October 1997 listing. Same-date closes carry a 15-hour gap "
-             "between Taipei and New York. Both series are split-adjusted by the same stock-dividend events, so the 5:1 ratio holds; "
-             "small transient errors are possible on ex-dates. FX is the Fed's noon buying rate, forward-filled."),
-    "infosys": ("**Reading it.** The premium was above 30% almost from the first week of trading and stayed there for six and a half years, "
-                "through the 2000 bust and India's 2002 two-way-fungibility rule, which only allowed re-conversion against cancelled ADSs. "
-                "It came down after the sponsored ADS offerings of 2005 and 2006 lifted the ADS share of the company from 14% to 19%: single "
-                "digits by 2007, and within a few percent of parity every year since 2009, slightly negative today. With a large ADS float and "
-                "two-way fungibility working in practice, Infosys is the case where a 50% premium did close completely.\n\n"
-                "**Caveats.** Before July 2004 each ADS represented half a share; the adjusted series carries today's 1:1 ratio and is "
-                "continuous through the 2000 and 2004 corporate actions. Same-date closes carry a 10-hour gap between Mumbai and New York. "
-                "FX is the Fed's noon buying rate, forward-filled."),
-}
-
-
 @st.cache_data(ttl=86400, show_spinner="Loading ADR history…")
 def load_case(key: str):
     case = dr_history.CASES[key]
     snapshot = ROOT / "data" / f"{key}_premium.csv"
     try:
         rows, dropped = dr_history.fetch_case(case)
-        if len(rows) < 1000:
+        if len(rows) < 250:
             raise RuntimeError("short series")
         source = f"live (Yahoo closes, Federal Reserve H.10 FX) · {len(dropped)} bad vendor prints dropped"
     except Exception as e:
         rows, source = dr_history.load_csv(snapshot), f"snapshot data/{key}_premium.csv (live fetch failed: {e})"
-    df = pd.DataFrame(rows)
-    df["time"] = pd.to_datetime(df["date"])
-    df["premium_pct"] = df["premium"] * 100
-    df["days"] = (df["time"] - pd.Timestamp(case.listed)).dt.days
-    return df, source
+    return dr_history.frame(rows, case), source
+
+
+@st.cache_data(show_spinner=False)
+def load_snapshot(key: str):
+    case = dr_history.CASES[key]
+    return dr_history.frame(dr_history.load_csv(ROOT / "data" / f"{key}_premium.csv"), case)
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
@@ -713,9 +696,36 @@ def load_skhy_daily():
 
 with tab_hist:
     st.markdown("**The same premium in earlier lives.** ADR against the home share in dollars, daily closes, the home-market close against "
-                "the New York close of the same date. TSMC: TSM vs 2330.TW, 1 ADS = 5 shares. Infosys: INFY vs INFY.NS, 1 ADS = 1 share.")
-    sel = st.radio("Case", ["Infosys (1999→)", "TSMC (2000→)"], horizontal=True, key="hist_case")
-    key = "infosys" if sel.startswith("Infosys") else "tsmc"
+                "the New York close of the same date. Restricted cases (India, Taiwan) are where premiums lived; the freely convertible "
+                "Brazilian and Mexican ADRs are the control group and sit at parity.")
+
+    st.markdown("**All precedents at a glance** · from the committed snapshots")
+    summary_rows = []
+    for k, c in dr_history.CASES.items():
+        try:
+            sdf_ = load_snapshot(k)
+        except Exception:
+            continue
+        if sdf_.empty:
+            continue
+        first3 = sdf_[sdf_["days"] <= 3 * 365]["premium"]
+        last12 = sdf_[sdf_["time"] >= sdf_["time"].max() - pd.Timedelta(days=365)]["premium"]
+        summary_rows.append({"Company": c.name, "Market": c.country, "Convertibility": c.convertibility, "ADS ratio": f"1 ADS = {c.ratio:g} sh",
+                             "Coverage": f"{sdf_['date'].iloc[0][:7]} → {sdf_['date'].iloc[-1][:7]}",
+                             "Mean, first 3 yrs": pct(first3.mean(), 0) if len(first3) else "—", "Peak": pct(sdf_["premium"].max(), 0),
+                             "Mean, last 12 mo": pct(last12.mean(), 1), "Latest": pct(sdf_["premium"].iloc[-1], 1)})
+    for name, country, why in dr_history.UNAVAILABLE:
+        summary_rows.append({"Company": name, "Market": country, "Convertibility": "—", "ADS ratio": "—", "Coverage": "no free data",
+                             "Mean, first 3 yrs": "—", "Peak": "—", "Mean, last 12 mo": "—", "Latest": why})
+    st.dataframe(pd.DataFrame(summary_rows), hide_index=True, width="stretch")
+    st.caption("First-3-year means for TSMC start at day 818 (no Taiwan share data before 2000). Where the vendor recorded a bonus issue on one "
+               "listing only, the series carries a documented correction factor; where mismatches could not be resolved (FEMSA before 2005, "
+               "Bradesco before 2018, Gerdau before 2009, América Móvil before its 2023 share-class merger) the series starts later. "
+               "A freely convertible ADR cannot hold a step-shaped premium, which is how those artefacts were identified.")
+
+    st.markdown("---")
+    labels = {k: f"{c.name} · {c.country} ({c.listed[:4]}→)" for k, c in dr_history.CASES.items()}
+    key = st.selectbox("Case", list(labels), format_func=lambda k: labels[k], index=list(labels).index("infosys"), key="hist_case")
     case = dr_history.CASES[key]
     try:
         tdf, tsrc = load_case(key)
@@ -725,8 +735,8 @@ with tab_hist:
         st.error(f"{case.name} data unavailable: {tsrc}")
     else:
         first_year = int(tdf["date"].iloc[0][:4])
-        ranges = {f"All ({first_year}→)": (f"{first_year - 1}-06-01", None), "Listing to 2005": (case.listed, "2005-12-31"),
-                  "2006–2019": ("2006-01-01", "2019-12-31"), "2020→": ("2020-01-01", None),
+        ranges = {f"All ({first_year}→)": (f"{first_year - 1}-06-01", None), "First 5 years": (tdf["date"].iloc[0], (tdf["time"].iloc[0] + pd.Timedelta(days=5 * 365)).strftime("%Y-%m-%d")),
+                  "2010–2019": ("2010-01-01", "2019-12-31"), "2020→": ("2020-01-01", None),
                   "Last 12 months": ((pd.Timestamp.today() - pd.Timedelta(days=365)).strftime("%Y-%m-%d"), None)}
         r1, r2 = st.columns([2, 3])
         with r1:
@@ -760,7 +770,7 @@ with tab_hist:
             ts = pd.Timestamp(d)
             if sub["time"].min() <= ts <= sub["time"].max():
                 fig.add_vline(x=ts, line_dash="dot", line_color=C_MUTED, line_width=1)
-                fig.add_annotation(x=ts, y=1, yref="paper", text=label, showarrow=False, xanchor="left", yanchor="top", textangle=0,
+                fig.add_annotation(x=ts, y=1, yref="paper", text=label, showarrow=False, xanchor="left", yanchor="top",
                                    font=dict(size=10.5, color="#b7b2c5"))
         skhy_live = st.session_state.get("last_good")
         if skhy_live and ok(skhy_live.get("mark_prem")):
@@ -770,7 +780,7 @@ with tab_hist:
         top = max(sub["premium_pct"].max(), max([v for _, v, _ in rep], default=0))
         fig.update_yaxes(range=[floor, top + 8])
         st.plotly_chart(fig, width="stretch", key=f"hist_chart_{key}")
-        st.caption("Diamonds are figures reported in the literature (annual means, press prints), drawn for comparison with the computed line, not data. "
+        st.caption("Diamonds are figures reported in the literature, drawn for comparison with the computed line, not data. "
                    "Dotted lines mark events. The dashed line is SKHY's live mark premium for scale.")
 
         st.markdown("**Regimes: premium by year**")
@@ -789,24 +799,29 @@ with tab_hist:
             st.dataframe(show.rename(columns={"year": "Year", "mean": "Mean", "median": "Median", "min": "Low", "max": "High", "days": "Days"}),
                          hide_index=True, width="stretch", height=320)
         with c2:
-            st.markdown(READING[key])
+            st.markdown(case.reading)
         st.download_button(f"Download {case.name} premium CSV", tdf[["date", "adr", "local", "fx", "premium_pct"]].to_csv(index=False).encode(),
                            file_name=f"{key}_premium.csv", mime="text/csv", key=f"dl_{key}")
 
     st.markdown("---")
     st.markdown("**Since listing: SKHY against the precedents, by days after the ADR's first trading day**")
-    horizon = st.radio("Horizon", ["First 90 days", "First year", "First 3 years", "Whole life"], horizontal=True, key="hist_horizon")
+    h1, h2 = st.columns([2, 3])
+    with h1:
+        horizon = st.radio("Horizon", ["First 90 days", "First year", "First 3 years", "Whole life"], horizontal=True, key="hist_horizon")
+    with h2:
+        picks = st.multiselect("Precedents", list(labels), default=["infosys", "tsmc", "wipro"], format_func=lambda k: labels[k], key="hist_picks")
     hmax = {"First 90 days": 90, "First year": 365, "First 3 years": 3 * 365, "Whole life": None}[horizon]
+    palette = [C_KR, C_ADR, "#1baf7a", "#eda100", "#e87ba4", "#008300", "#e34948", "#c3c2b7", "#3987e5", "#d95926", "#199e70", "#c98500"]
     cmp_fig = go.Figure()
-    for k, col in (("infosys", C_KR), ("tsmc", C_ADR)):
+    for i, k in enumerate(picks):
         try:
-            cdf, _ = load_case(k)
+            cdf = load_snapshot(k)
         except Exception:
             continue
         c = cdf if hmax is None else cdf[cdf["days"] <= hmax]
         if not c.empty:
             nm = dr_history.CASES[k].name
-            cmp_fig.add_trace(go.Scatter(x=c["days"], y=c["premium_pct"], mode="lines", name=nm, line=dict(color=col, width=1.5),
+            cmp_fig.add_trace(go.Scatter(x=c["days"], y=c["premium_pct"], mode="lines", name=nm, line=dict(color=palette[i % len(palette)], width=1.5),
                                          hovertemplate="day %{x}: %{y:+.1f}%<extra>" + nm + "</extra>"))
     try:
         sdf = load_skhy_daily()
@@ -816,12 +831,12 @@ with tab_hist:
         s = sdf if hmax is None else sdf[sdf["days"] <= hmax]
         cmp_fig.add_trace(go.Scatter(x=s["days"], y=s["premium_pct"], mode="lines", name="SKHY (2026)", line=dict(color=C_PREM, width=2.5),
                                      hovertemplate="day %{x}: %{y:+.1f}%<extra>SKHY</extra>"))
-    base_layout(cmp_fig, 320, ysuffix="%")
+    base_layout(cmp_fig, 340, ysuffix="%")
     cmp_fig.update_xaxes(title_text="days since ADR listing")
     cmp_fig.update_layout(hovermode="closest")
     st.plotly_chart(cmp_fig, width="stretch", key="hist_compare")
-    st.caption("Infosys runs from its first trading day. TSMC starts at day 818 because its Taiwan share history begins in January 2000. "
-               "SKHY is the Hyperliquid perp-based daily series from 9 July 2026.")
+    st.caption("Series start where their data starts: Infosys at day 0; TSMC at day 818; the Brazilian and Mexican names and Wipro from the first "
+               "date their adjustments are consistent. SKHY is the Hyperliquid perp-based daily series from 9 July 2026.")
 
 
 # ---------------------------------------------------------------- about tab
